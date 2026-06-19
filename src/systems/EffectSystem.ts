@@ -1,5 +1,5 @@
 import { MeshBuilder, Vector3, Mesh, Scene } from "../bjs";
-import { flatMat } from "../entities/models/materials";
+import { glowMat } from "../entities/models/materials";
 import { ObjectPool } from "../core/ObjectPool";
 
 interface Projectile {
@@ -59,7 +59,7 @@ export class EffectSystem {
     this.coinPool = new ObjectPool<Mesh>({
       create: () => {
         const m = MeshBuilder.CreateCylinder("coin", { diameter: 0.5, height: 0.12, tessellation: 10 }, scene);
-        m.material = flatMat(scene, "#ffcc33", 0.7);
+        m.material = glowMat(scene, "#ffcf3a", 1.4);
         m.isPickable = false;
         m.setEnabled(false);
         return m;
@@ -72,7 +72,7 @@ export class EffectSystem {
 
   fireProjectile(from: Vector3, to: Vector3, colorHex: string, arc = 0): void {
     const mesh = this.projPool.acquire();
-    mesh.material = flatMat(this.scene, colorHex, 0.8);
+    mesh.material = glowMat(this.scene, colorHex, 1.5);
     mesh.position.copyFrom(from);
     const dist = Vector3.Distance(from, to);
     this.projectiles.push({
@@ -87,7 +87,7 @@ export class EffectSystem {
 
   burst(pos: Vector3, colorHex: string, size = 1.2): void {
     const mesh = this.burstPool.acquire();
-    mesh.material = flatMat(this.scene, colorHex, 0.9);
+    mesh.material = glowMat(this.scene, colorHex, 1.7);
     mesh.position.copyFrom(pos);
     mesh.scaling.setAll(0.2);
     this.bursts.push({ mesh, age: 0, life: 0.28, grow: size });

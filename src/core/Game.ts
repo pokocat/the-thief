@@ -10,6 +10,7 @@ import { TowerManager } from "../entities/TowerManager";
 import { CameraController } from "./CameraController";
 import { WaveSystem } from "../systems/WaveSystem";
 import { UI } from "../ui/UI";
+import { setupVisuals } from "../render/setup";
 import type { GameContext } from "./Context";
 
 const FIXED_DT = 1 / 60;
@@ -28,10 +29,14 @@ export class Game {
     this.scene = new Scene(this.engine);
 
     const path = new PathSystem(GameMap);
+    const camera = new CameraController(this.scene, canvas, GameMap);
+
+    // lights, soft shadows, gradient sky, fog, bloom/ACES pipeline
+    setupVisuals(this.scene, camera.camera);
+
     const builder = new SceneBuilder(this.scene, GameMap, path);
     builder.build();
 
-    const camera = new CameraController(this.scene, canvas, GameMap);
     const state = new GameState();
     this.overlay = new WorldOverlay(this.scene, camera.camera, document.getElementById("ui-root")!);
     const effects = new EffectSystem(this.scene);
