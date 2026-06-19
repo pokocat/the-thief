@@ -1,5 +1,5 @@
 import { Engine, Scene } from "../bjs";
-import { GameMap } from "../config";
+import { GameMap, towerCfg } from "../config";
 import { PathSystem } from "../map/PathSystem";
 import { SceneBuilder } from "../map/SceneBuilder";
 import { GameState } from "./GameState";
@@ -58,6 +58,18 @@ export class Game {
 
     this.waves.beginIntermission();
     this.start();
+
+    // lightweight debug hook (used by the Playwright screenshot harness)
+    (window as unknown as { heistTD: unknown }).heistTD = {
+      ctx: this.ctx,
+      waves: this.waves,
+      camera,
+      ui: this.ui,
+      build: (id: string, padIndex: number) => {
+        const pad = this.ctx.pads[padIndex];
+        if (pad && !pad.occupied) this.ctx.towers.build(towerCfg(id), pad);
+      },
+    };
   }
 
   private handleTap(clientX: number, clientY: number): void {
