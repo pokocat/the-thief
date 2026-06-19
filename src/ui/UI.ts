@@ -321,6 +321,7 @@ export class UI {
     });
     bus.on("waveEnd", (p) => this.showSummary(p));
     bus.on("gameOver", (p) => this.showGameOver(p.won, p.wavesCleared, p.leaks));
+    bus.on("bossSpawn", (p) => this.showBanner(`⚔️ BOSS 来袭 — ${p.name}！`, 2.5));
   }
 
   private showSummary(p: {

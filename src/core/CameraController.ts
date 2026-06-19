@@ -13,6 +13,8 @@ export class CameraController {
   private readonly minR = 18;
   private readonly maxR = 64;
 
+  private shakeTime = 0;
+  private shakeMag = 0;
   private dragging = false;
   private moved = 0;
   private lastX = 0;
@@ -32,6 +34,22 @@ export class CameraController {
     this.camera.lowerRadiusLimit = this.minR;
     this.camera.upperRadiusLimit = this.maxR;
     this.attach();
+
+    // screen-shake via projection offset (doesn't disturb pan/zoom state)
+    scene.onBeforeRenderObservable.add(() => {
+      if (this.shakeTime > 0) {
+        const dt = scene.getEngine().getDeltaTime() / 1000;
+        this.shakeTime -= dt;
+        const k = Math.max(0, this.shakeTime) * this.shakeMag;
+        this.camera.targetScreenOffset.set((Math.random() - 0.5) * k, (Math.random() - 0.5) * k);
+        if (this.shakeTime <= 0) this.camera.targetScreenOffset.set(0, 0);
+      }
+    });
+  }
+
+  shake(magnitude = 0.6, duration = 0.5): void {
+    this.shakeTime = duration;
+    this.shakeMag = magnitude / duration;
   }
 
   reset(): void {

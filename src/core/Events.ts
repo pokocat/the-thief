@@ -20,6 +20,7 @@ export type EventMap = {
   techChanged: Record<string, never>;
   gameOver: { won: boolean; wavesCleared: number; leaks: number };
   hudRefresh: Record<string, never>;
+  bossSpawn: { name: string };
 };
 
 type Handler<T> = (payload: T) => void;

@@ -43,6 +43,8 @@ export class EnemyManager {
     v.root.setEnabled(false);
     v.slowRing.setEnabled(false);
     v.freezeBox.setEnabled(false);
+    v.body.position.y = 0;
+    for (const L of v.limbs) L.pivot.rotation.x = 0;
     let pool = this.visualPools.get(cfg.id);
     if (!pool) {
       pool = [];
@@ -56,6 +58,7 @@ export class EnemyManager {
     const e = this.enemyPool.acquire();
     e.reset(cfg, hpMul, speedMul, rewardMul, visual);
     if (extraGold) this.extraGold.set(e.uid, extraGold);
+    if (cfg.tags.includes("boss")) bus.emit("bossSpawn", { name: cfg.name });
     e.barEl = this.overlay.acquireBar();
     const y = cfg.isFlying ? Balance.flyingHeight : 0;
     this.path.sample(0, e.pos, y);
@@ -126,9 +129,11 @@ export class EnemyManager {
       v.root.position.copyFrom(e.pos);
       v.root.rotation.y = heading;
 
-      // walk bob (only while moving)
+      // walk cycle: body bob + limb swing (only while moving)
       if (speed > 0.01) {
-        v.body.position.y = Math.abs(Math.sin(time * 6 + e.uid)) * 0.12;
+        const gait = time * 9 + e.uid;
+        v.body.position.y = Math.abs(Math.sin(gait)) * 0.1;
+        for (const L of v.limbs) L.pivot.rotation.x = Math.sin(gait + L.phase) * L.amp;
       }
       // status visuals
       v.slowRing.setEnabled(time < e.slowUntil && time >= e.frozenUntil);

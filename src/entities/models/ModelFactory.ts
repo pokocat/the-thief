@@ -8,12 +8,19 @@ export interface TowerVisual {
   muzzleHeight: number;
 }
 
+export interface LimbAnim {
+  pivot: TransformNode; // rotates around its hip/shoulder
+  phase: number;
+  amp: number;
+}
+
 export interface EnemyVisual {
   root: TransformNode;
   body: TransformNode; // bobs while walking
   topY: number;
   slowRing: Mesh;
   freezeBox: Mesh;
+  limbs: LimbAnim[]; // animated legs/arms (procedural walk cycle)
 }
 
 // --- primitive helpers (each takes a shared toon/glow material) ------------
@@ -39,6 +46,17 @@ function cap(s: Scene, p: TransformNode, m: Material, radius: number, height: nu
   const x = MeshBuilder.CreateCapsule("cap", { radius, height, tessellation: 10, subdivisions: 1 }, s);
   x.material = m; x.parent = p; x.position.set(pos[0], pos[1], pos[2]);
   return x;
+}
+// A limb that swings around a hip/shoulder pivot for the walk cycle.
+function limb(
+  s: Scene, body: TransformNode, m: Material, radius: number, length: number,
+  hip: [number, number, number], phase: number, amp: number, list: LimbAnim[]
+): void {
+  const pivot = new TransformNode("limb", s);
+  pivot.parent = body; pivot.position.set(hip[0], hip[1], hip[2]);
+  const c = MeshBuilder.CreateCapsule("limbCap", { radius, height: length, tessellation: 8, subdivisions: 1 }, s);
+  c.material = m; c.parent = pivot; c.position.y = -length / 2;
+  list.push({ pivot, phase, amp });
 }
 
 const SKIN = "#d8b486";
@@ -177,6 +195,7 @@ export function buildEnemyModel(scene: Scene, cfg: EnemyConfig): EnemyVisual {
   body.parent = root;
   const m = toonMat(scene, cfg.color);
   const s = cfg.scale;
+  const limbs: LimbAnim[] = [];
   let topY = 1.7 * s;
 
   switch (cfg.model) {
@@ -186,10 +205,10 @@ export function buildEnemyModel(scene: Scene, cfg: EnemyConfig): EnemyVisual {
       box(scene, body, toonMat(scene, "#3df6ff"), 0.7 * s, 0.22 * s, 0.1, [0, 1.62 * s, 0.3 * s]); // goggles band
       sphere(scene, body, glowMat(scene, "#3df6ff", 1.4), 0.2 * s, [0.18 * s, 1.62 * s, 0.34 * s], 8);
       sphere(scene, body, glowMat(scene, "#3df6ff", 1.4), 0.2 * s, [-0.18 * s, 1.62 * s, 0.34 * s], 8);
-      cap(scene, body, m, 0.1 * s, 0.9 * s, [0.22 * s, 0.5 * s, 0]); // long legs
-      cap(scene, body, m, 0.1 * s, 0.9 * s, [-0.22 * s, 0.5 * s, 0]);
-      cap(scene, body, m, 0.09 * s, 0.6 * s, [0.4 * s, 1.1 * s, -0.1]); // arms back
-      cap(scene, body, m, 0.09 * s, 0.6 * s, [-0.4 * s, 1.1 * s, -0.1]);
+      limb(scene, body, m, 0.1 * s, 0.9 * s, [0.22 * s, 0.95 * s, 0], 0, 0.65, limbs); // long legs
+      limb(scene, body, m, 0.1 * s, 0.9 * s, [-0.22 * s, 0.95 * s, 0], Math.PI, 0.65, limbs);
+      limb(scene, body, m, 0.09 * s, 0.6 * s, [0.4 * s, 1.4 * s, -0.1], Math.PI, 0.5, limbs); // arms
+      limb(scene, body, m, 0.09 * s, 0.6 * s, [-0.4 * s, 1.4 * s, -0.1], 0, 0.5, limbs);
       topY = 2.0 * s;
       break;
     }
@@ -211,8 +230,8 @@ export function buildEnemyModel(scene: Scene, cfg: EnemyConfig): EnemyVisual {
       sphere(scene, body, m, 0.7 * s, [0, 1.75 * s, 0]); // head
       eyes(scene, body, 0.22 * s, 1.8 * s, 0.3 * s, s);
       box(scene, body, toonMat(scene, "#2a1a1a"), 0.5 * s, 0.16 * s, 0.1, [0, 1.5 * s, 0.55 * s]); // wide mouth
-      cap(scene, body, m, 0.16 * s, 0.4 * s, [0.85 * s, 0.7 * s, 0]); // stubby arms
-      cap(scene, body, m, 0.16 * s, 0.4 * s, [-0.85 * s, 0.7 * s, 0]);
+      limb(scene, body, m, 0.16 * s, 0.4 * s, [0.85 * s, 0.9 * s, 0], Math.PI, 0.35, limbs); // stubby arms
+      limb(scene, body, m, 0.16 * s, 0.4 * s, [-0.85 * s, 0.9 * s, 0], 0, 0.35, limbs);
       topY = 2.3 * s;
       break;
     }
@@ -245,7 +264,8 @@ export function buildEnemyModel(scene: Scene, cfg: EnemyConfig): EnemyVisual {
       sphere(scene, body, glowMat(scene, "#fff2a8", 1.6), 0.1 * s, [-0.16 * s, 1.6 * s, 0.34 * s], 6);
       const sack = sphere(scene, body, glowMat(scene, "#ffcf3a", 0.7), 1.0 * s, [0, 1.2 * s, -0.6 * s], 12); sack.scaling.z = 0.9;
       cyl(scene, body, toonMat(scene, "#caa063"), 0.06, 0.06, 0.5 * s, [0, 1.85 * s, -0.6 * s]); // sack tie
-      cap(scene, body, m, 0.12 * s, 0.5 * s, [0.2 * s, 0.4 * s, 0]); cap(scene, body, m, 0.12 * s, 0.5 * s, [-0.2 * s, 0.4 * s, 0]);
+      limb(scene, body, m, 0.12 * s, 0.5 * s, [0.2 * s, 0.65 * s, 0], 0, 0.55, limbs);
+      limb(scene, body, m, 0.12 * s, 0.5 * s, [-0.2 * s, 0.65 * s, 0], Math.PI, 0.55, limbs);
       topY = 2.1 * s;
       break;
     }
@@ -262,8 +282,8 @@ export function buildEnemyModel(scene: Scene, cfg: EnemyConfig): EnemyVisual {
       cyl(scene, crown, glowMat(scene, "#ffcf3a", 0.8), 1.0 * s, 1.0 * s, 0.2 * s, [0, 0, 0]);
       for (let i = 0; i < 7; i++) { const a = (i / 7) * Math.PI * 2; cone(scene, crown, glowMat(scene, "#ffd84a", 0.9), 0.16 * s, 0.4 * s, [Math.cos(a) * 0.5 * s, 0.25 * s, Math.sin(a) * 0.5 * s]); }
       sphere(scene, body, glowMat(scene, "#ffcf3a", 0.6), 1.2 * s, [0, 1.3 * s, -0.95 * s], 12); // loot sack
-      cap(scene, body, m, 0.4 * s, 1.0 * s, [1.7 * s, 0.9 * s, 0]); // club arm
-      sphere(scene, body, toonMat(scene, "#6a3520"), 0.7 * s, [2.1 * s, 1.5 * s, 0], 8); // club head
+      limb(scene, body, m, 0.4 * s, 1.0 * s, [1.5 * s, 2.0 * s, 0], 0, 0.3, limbs); // club arm (swings)
+      sphere(scene, limbs[limbs.length - 1].pivot, toonMat(scene, "#6a3520"), 0.7 * s, [0, -1.1 * s, 0], 8); // club head
       topY = 4.0 * s;
       break;
     }
@@ -278,8 +298,10 @@ export function buildEnemyModel(scene: Scene, cfg: EnemyConfig): EnemyVisual {
       box(scene, body, toonMat(scene, "#2a1a1a"), 0.4 * s, 0.1 * s, 0.08, [0, 1.25 * s, 0.42 * s]); // mouth
       cone(scene, body, toonMat(scene, "#fff"), 0.07 * s, 0.16 * s, [0.1 * s, 1.3 * s, 0.45 * s]); // snaggle tooth
       box(scene, body, toonMat(scene, "#7a4a28"), 0.6 * s, 0.4 * s, 0.5 * s, [0, 0.45 * s, 0]); // loincloth
-      cap(scene, body, m, 0.13 * s, 0.45 * s, [0.32 * s, 0.3 * s, 0]); cap(scene, body, m, 0.13 * s, 0.45 * s, [-0.32 * s, 0.3 * s, 0]); // legs
-      cap(scene, body, m, 0.11 * s, 0.4 * s, [0.5 * s, 0.85 * s, 0]); cap(scene, body, m, 0.11 * s, 0.4 * s, [-0.5 * s, 0.85 * s, 0]); // arms
+      limb(scene, body, m, 0.13 * s, 0.45 * s, [0.32 * s, 0.525 * s, 0], 0, 0.55, limbs); // legs
+      limb(scene, body, m, 0.13 * s, 0.45 * s, [-0.32 * s, 0.525 * s, 0], Math.PI, 0.55, limbs);
+      limb(scene, body, m, 0.11 * s, 0.4 * s, [0.5 * s, 1.05 * s, 0], Math.PI, 0.45, limbs); // arms
+      limb(scene, body, m, 0.11 * s, 0.4 * s, [-0.5 * s, 1.05 * s, 0], 0, 0.45, limbs);
       topY = 2.0 * s;
       break;
     }
@@ -296,7 +318,7 @@ export function buildEnemyModel(scene: Scene, cfg: EnemyConfig): EnemyVisual {
   freezeBox.parent = root; freezeBox.position.y = topY * 0.5; freezeBox.isPickable = false; freezeBox.setEnabled(false);
 
   applyToonStyle(root, 0.04 * s);
-  return { root, body, topY, slowRing, freezeBox };
+  return { root, body, topY, slowRing, freezeBox, limbs };
 }
 
 export const ModelColors = { GOLD: "#ffcf3a" };

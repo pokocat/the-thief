@@ -7,7 +7,7 @@ import {
   TransformNode,
   ParticleSystem,
 } from "../bjs";
-import { flatMat, toonMat, glowMat, translucentMat, applyToonStyle, softCircleTexture } from "../entities/models/materials";
+import { flatMat, toonMat, glowMat, translucentMat, applyToonStyle, softCircleTexture, bumpyMat } from "../entities/models/materials";
 import { PathSystem } from "./PathSystem";
 import type { MapData } from "../config/types";
 import { randRange, rand } from "../util/math";
@@ -43,7 +43,7 @@ export class SceneBuilder {
 
     const top = MeshBuilder.CreateBox("islandTop", { width: w, height: 1, depth: d }, this.scene);
     top.position.set(cx, -0.5, cz);
-    top.material = flatMat(this.scene, "#5fa03e", 0.12);
+    top.material = bumpyMat(this.scene, "#5fa03e", 14, 0.5);
     top.receiveShadows = true;
     top.isPickable = false;
 
@@ -77,7 +77,7 @@ export class SceneBuilder {
       const tile = MeshBuilder.CreateBox("path", { width: this.map.pathWidth, height: 0.16, depth: step + 0.12 }, this.scene);
       tile.position.copyFrom(out);
       tile.rotation.y = heading;
-      tile.material = flatMat(this.scene, i % 2 === 0 ? "#c2a878" : "#b09668", 0.1);
+      tile.material = bumpyMat(this.scene, i % 2 === 0 ? "#c2a878" : "#b09668", 1, 0.5);
       tile.receiveShadows = true;
       tile.isPickable = false;
       i++;

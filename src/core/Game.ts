@@ -11,6 +11,7 @@ import { CameraController } from "./CameraController";
 import { WaveSystem } from "../systems/WaveSystem";
 import { UI } from "../ui/UI";
 import { setupVisuals } from "../render/setup";
+import { bus } from "./Events";
 import type { GameContext } from "./Context";
 
 const FIXED_DT = 1 / 60;
@@ -23,6 +24,8 @@ export class Game {
   private ui: UI;
   private overlay: WorldOverlay;
   private accumulator = 0;
+  private timeScale = 1;
+  private slowmo = 0;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.engine = new Engine(canvas, true, { preserveDrawingBuffer: false, stencil: false }, true);
@@ -60,6 +63,13 @@ export class Game {
     this.ui = new UI(this.ctx, this.waves, camera);
 
     camera.onTap = (x, y) => this.handleTap(x, y);
+
+    // boss intro: screen shake + brief slow-mo
+    bus.on("bossSpawn", () => {
+      camera.shake(0.7, 0.6);
+      this.slowmo = 0.9;
+      this.timeScale = 0.4;
+    });
 
     this.waves.beginIntermission();
     this.start();
@@ -103,7 +113,11 @@ export class Game {
   private start(): void {
     this.engine.runRenderLoop(() => {
       const frame = Math.min(0.1, this.engine.getDeltaTime() / 1000);
-      this.accumulator += frame;
+      if (this.slowmo > 0) {
+        this.slowmo -= frame;
+        if (this.slowmo <= 0) this.timeScale = 1;
+      }
+      this.accumulator += frame * this.timeScale;
       let guard = 0;
       while (this.accumulator >= FIXED_DT && guard < 5) {
         this.step(FIXED_DT);
