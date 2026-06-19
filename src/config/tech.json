@@ -1,0 +1,37 @@
+{
+  "steal_skill": {
+    "id": "steal_skill", "name": "偷盗技巧", "maxLevel": 5,
+    "perLevel": 0.10, "unit": "+10% 偷钱倍率",
+    "effect": "stealMultiplierBonus",
+    "costs": [120, 240, 480, 900, 1600],
+    "desc": "所有怪盗塔（及英雄塔）偷钱倍率 +10% / 级。"
+  },
+  "attack_training": {
+    "id": "attack_training", "name": "攻速训练", "maxLevel": 5,
+    "perLevel": 0.05, "unit": "+5% 怪盗攻速",
+    "effect": "thiefAttackSpeedBonus",
+    "costs": [100, 200, 400, 800, 1500],
+    "desc": "所有怪盗塔攻速 +5% / 级（立即影响已建塔）。"
+  },
+  "armor_research": {
+    "id": "armor_research", "name": "破甲研究", "maxLevel": 5,
+    "perLevel": 1, "unit": "+1 破甲",
+    "effect": "armorShredBonus",
+    "costs": [150, 300, 600, 1100, 2000],
+    "desc": "破甲法师的破甲效果 +1 / 级。"
+  },
+  "frost_enhance": {
+    "id": "frost_enhance", "name": "冰霜强化", "maxLevel": 5,
+    "perLevel": 0.05, "unit": "+5% 减速",
+    "effect": "slowBonus",
+    "costs": [120, 240, 480, 900, 1600],
+    "desc": "冰霜/减速效果 +5% / 级。"
+  },
+  "antiair_training": {
+    "id": "antiair_training", "name": "防空训练", "maxLevel": 5,
+    "perLevel": 0.10, "unit": "+10% 防空伤害",
+    "effect": "antiAirDamageBonus",
+    "costs": [150, 300, 600, 1100, 2000],
+    "desc": "可防空的塔伤害 +10% / 级。"
+  }
+}

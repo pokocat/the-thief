@@ -1,0 +1,147 @@
+{
+  "thief_01": {
+    "id": "thief_01", "name": "怪盗学徒", "category": "thief", "model": "thief", "tier": 1,
+    "cost": 100, "damage": 12, "damageType": "physical", "attackInterval": 1.0, "range": 3.5,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "stealEveryHits": 4, "stealMultiplier": 1.0, "upgradeTo": "thief_02",
+    "desc": "投掷飞刀。每攻击4次偷取一次金币。",
+    "color": "#6b4fa0", "buildable": true
+  },
+  "thief_02": {
+    "id": "thief_02", "name": "夜行盗", "category": "thief", "model": "thief", "tier": 2,
+    "cost": 250, "damage": 30, "damageType": "physical", "attackInterval": 0.85, "range": 3.7,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "stealEveryHits": 4, "stealMultiplier": 1.5, "upgradeTo": "thief_03",
+    "desc": "更快的飞刀与更狠的偷窃。", "color": "#5a3d8a", "buildable": false
+  },
+  "thief_03": {
+    "id": "thief_03", "name": "机械盗贼", "category": "thief", "model": "thief", "tier": 3,
+    "cost": 700, "damage": 80, "damageType": "physical", "attackInterval": 0.75, "range": 4.0,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "stealEveryHits": 4, "stealMultiplier": 2.2, "upgradeTo": "thief_04",
+    "desc": "机械金币钩，偷窃倍率大幅提升。", "color": "#7a5fb5", "buildable": false
+  },
+  "thief_04": {
+    "id": "thief_04", "name": "空盗", "category": "thief", "model": "thief", "tier": 4,
+    "cost": 1800, "damage": 180, "damageType": "physical", "attackInterval": 0.65, "range": 4.5,
+    "canAttackGround": true, "canAttackAir": true, "targetMode": "first",
+    "stealEveryHits": 4, "stealMultiplier": 3.2, "upgradeTo": "thief_05",
+    "desc": "可攻击空军，偷窃凶猛。", "color": "#8e6fd0", "buildable": false
+  },
+  "thief_05": {
+    "id": "thief_05", "name": "盗王塔", "category": "thief", "model": "thief", "tier": 5,
+    "cost": 5000, "damage": 400, "damageType": "physical", "attackInterval": 0.5, "range": 5.0,
+    "canAttackGround": true, "canAttackAir": true, "targetMode": "first",
+    "stealEveryHits": 4, "stealMultiplier": 5.0, "upgradeTo": null,
+    "desc": "盗贼之王。海量偷窃，对空对地皆可。", "color": "#a884f0", "buildable": false
+  },
+
+  "mage_blood_01": {
+    "id": "mage_blood_01", "name": "嗜血学徒", "category": "mage", "model": "mage_blood", "tier": 1,
+    "cost": 150, "damage": 8, "damageType": "magic", "attackInterval": 1.2, "range": 3.0,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "specialEffect": { "type": "aura_attackspeed", "value": 0.2, "radius": 3.2 },
+    "upgradeTo": "mage_blood_02", "desc": "红色光环：提升范围内友方塔攻速 +20%。",
+    "color": "#d24b4b", "buildable": true
+  },
+  "mage_blood_02": {
+    "id": "mage_blood_02", "name": "嗜血法师", "category": "mage", "model": "mage_blood", "tier": 2,
+    "cost": 400, "damage": 18, "damageType": "magic", "attackInterval": 1.0, "range": 3.2,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "specialEffect": { "type": "aura_attackspeed", "value": 0.35, "radius": 3.8 },
+    "upgradeTo": null, "desc": "范围内友方塔攻速 +35%。", "color": "#e85c5c", "buildable": false
+  },
+
+  "mage_armor_01": {
+    "id": "mage_armor_01", "name": "碎甲学徒", "category": "mage", "model": "mage_armor", "tier": 1,
+    "cost": 150, "damage": 10, "damageType": "magic", "attackInterval": 1.0, "range": 3.2,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "strongest",
+    "specialEffect": { "type": "armor_shred", "value": 2, "duration": 4 },
+    "upgradeTo": "mage_armor_02", "desc": "紫色碎甲：命中降低怪物护甲 2，持续4秒。",
+    "color": "#9b4fd2", "buildable": true
+  },
+  "mage_armor_02": {
+    "id": "mage_armor_02", "name": "破甲法师", "category": "mage", "model": "mage_armor", "tier": 2,
+    "cost": 400, "damage": 22, "damageType": "magic", "attackInterval": 0.9, "range": 3.4,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "strongest",
+    "specialEffect": { "type": "armor_shred", "value": 4, "duration": 5 },
+    "upgradeTo": null, "desc": "命中降低护甲 4，持续5秒。", "color": "#b15ee8", "buildable": false
+  },
+
+  "mage_slow_01": {
+    "id": "mage_slow_01", "name": "凝滞学徒", "category": "mage", "model": "mage_slow", "tier": 1,
+    "cost": 150, "damage": 8, "damageType": "magic", "attackInterval": 1.0, "range": 3.2,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "specialEffect": { "type": "slow", "value": 0.25, "duration": 2 },
+    "upgradeTo": "mage_slow_02", "desc": "青色减速：命中降低怪物移速 25%，持续2秒。",
+    "color": "#4fb5c4", "buildable": true
+  },
+  "mage_slow_02": {
+    "id": "mage_slow_02", "name": "减速法师", "category": "mage", "model": "mage_slow", "tier": 2,
+    "cost": 400, "damage": 18, "damageType": "magic", "attackInterval": 0.95, "range": 3.4,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "specialEffect": { "type": "slow", "value": 0.4, "duration": 2.5 },
+    "upgradeTo": null, "desc": "命中降低移速 40%，持续2.5秒。", "color": "#5ec8d8", "buildable": false
+  },
+
+  "frost_01": {
+    "id": "frost_01", "name": "冰霜塔", "category": "frost", "model": "frost", "tier": 1,
+    "cost": 200, "damage": 10, "damageType": "magic", "attackInterval": 1.1, "range": 3.2,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "specialEffect": { "type": "frost", "slow": 0.3, "slowDuration": 1.5, "freezeChance": 0, "freezeDuration": 0 },
+    "upgradeTo": "frost_02", "desc": "冰刺：低伤害 + 减速30%。", "color": "#6fc8e8", "buildable": true
+  },
+  "frost_02": {
+    "id": "frost_02", "name": "寒冰塔", "category": "frost", "model": "frost", "tier": 2,
+    "cost": 550, "damage": 28, "damageType": "magic", "attackInterval": 1.0, "range": 3.5,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "specialEffect": { "type": "frost", "slow": 0.4, "slowDuration": 1.8, "freezeChance": 0.25, "freezeDuration": 1.2 },
+    "upgradeTo": "frost_03", "desc": "减速40% + 25%几率短暂冰冻。Boss控制时长降低70%。",
+    "color": "#8ad8f5", "buildable": false
+  },
+  "frost_03": {
+    "id": "frost_03", "name": "冰封塔", "category": "frost", "model": "frost", "tier": 3,
+    "cost": 1400, "damage": 70, "damageType": "magic", "attackInterval": 0.9, "range": 3.8,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "first",
+    "specialEffect": { "type": "frost", "slow": 0.5, "slowDuration": 2.0, "freezeChance": 0.4, "freezeDuration": 1.8 },
+    "upgradeTo": null, "desc": "减速50% + 40%几率冰冻。", "color": "#a8e6ff", "buildable": false
+  },
+
+  "archer_01": {
+    "id": "archer_01", "name": "哨塔", "category": "archer", "model": "archer", "tier": 1,
+    "cost": 180, "damage": 14, "damageType": "physical", "attackInterval": 0.8, "range": 4.0,
+    "canAttackGround": true, "canAttackAir": true, "targetMode": "first",
+    "specialEffect": { "type": "multishot", "targets": 1, "antiAir": true },
+    "upgradeTo": "archer_02", "desc": "防空哨塔：可射击空军。", "color": "#5fa85f", "buildable": true
+  },
+  "archer_02": {
+    "id": "archer_02", "name": "弩塔", "category": "archer", "model": "archer", "tier": 2,
+    "cost": 500, "damage": 30, "damageType": "physical", "attackInterval": 0.6, "range": 4.3,
+    "canAttackGround": true, "canAttackAir": true, "targetMode": "first",
+    "specialEffect": { "type": "multishot", "targets": 2, "antiAir": true },
+    "upgradeTo": "archer_03", "desc": "同时攻击2个目标，对空对地。", "color": "#6fc26f", "buildable": false
+  },
+  "archer_03": {
+    "id": "archer_03", "name": "精灵射手", "category": "archer", "model": "archer", "tier": 3,
+    "cost": 1300, "damage": 65, "damageType": "physical", "attackInterval": 0.45, "range": 4.6,
+    "canAttackGround": true, "canAttackAir": true, "targetMode": "first",
+    "specialEffect": { "type": "multishot", "targets": 3, "antiAir": true },
+    "upgradeTo": null, "desc": "极速三连射，强力防空。", "color": "#84d684", "buildable": false
+  },
+
+  "hero_01": {
+    "id": "hero_01", "name": "英雄塔", "category": "hero", "model": "hero", "tier": 1,
+    "cost": 3000, "damage": 250, "damageType": "physical", "attackInterval": 0.7, "range": 4.5,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "strongest",
+    "stealEveryHits": 5, "stealMultiplier": 1.0, "equipSlots": 3,
+    "upgradeTo": "hero_02", "desc": "后期昂贵输出。可装备3件装备，也能偷钱。",
+    "color": "#e0a83a", "buildable": true
+  },
+  "hero_02": {
+    "id": "hero_02", "name": "传奇英雄", "category": "hero", "model": "hero", "tier": 2,
+    "cost": 6000, "damage": 600, "damageType": "physical", "attackInterval": 0.6, "range": 5.0,
+    "canAttackGround": true, "canAttackAir": false, "targetMode": "strongest",
+    "stealEveryHits": 5, "stealMultiplier": 1.5, "equipSlots": 3,
+    "upgradeTo": null, "desc": "战场霸主。", "color": "#f5c84a", "buildable": false
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "greedy_ring": {
+    "id": "greedy_ring", "name": "贪婪戒指", "cost": 800, "icon": "💍",
+    "modifiers": { "stealMultiplier": 0.25 },
+    "desc": "偷钱倍率 +25%。"
+  },
+  "swift_boots": {
+    "id": "swift_boots", "name": "疾风靴", "cost": 700, "icon": "🥾",
+    "modifiers": { "attackSpeed": 0.15 },
+    "desc": "攻速 +15%。"
+  },
+  "armor_blade": {
+    "id": "armor_blade", "name": "破甲刀", "cost": 750, "icon": "🗡️",
+    "modifiers": { "armorShredOnHit": 2, "armorShredDuration": 4 },
+    "desc": "攻击附带护甲 -2（持续4秒）。"
+  },
+  "frost_orb": {
+    "id": "frost_orb", "name": "冰魄珠", "cost": 750, "icon": "🔵",
+    "modifiers": { "slowOnHit": 0.2, "slowDuration": 1.5 },
+    "desc": "攻击附带 20% 减速。"
+  },
+  "fly_rune": {
+    "id": "fly_rune", "name": "飞行符", "cost": 600, "icon": "🪶",
+    "modifiers": { "canAttackAir": true },
+    "desc": "允许攻击空军。"
+  }
+}

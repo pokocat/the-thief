@@ -1,0 +1,16 @@
+{
+  "startingGold": 300,
+  "totalWaves": 30,
+  "leakLimit": 20,
+  "waveBonusBase": 50,
+  "waveBonusPerWave": 10,
+  "stealBaseFlat": 5,
+  "stealPerWave": 3,
+  "maxStealPerEnemyPerTower": 3,
+  "sellRefundRatio": 0.6,
+  "autoStartDelaySec": 18,
+  "maxConcurrentEnemies": 60,
+  "enemySpeedScale": 2.4,
+  "flyingHeight": 2.6,
+  "notes": "All gameplay numbers live in /src/config. Logic reads these; nothing is hard-coded. steal = (stealBaseFlat + wave*stealPerWave) * tower.stealMultiplier * enemy.valueMultiplier"
+}

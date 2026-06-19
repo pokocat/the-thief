@@ -1,0 +1,52 @@
+{
+  "waves": [
+    { "waveId": 1, "enemyType": "enemy_normal_01", "enemyCount": 12, "spawnInterval": 0.9, "hpMultiplier": 1.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["normal"], "hint": "第一波普通怪。先放一座怪盗学徒开始偷钱滚雪球。" },
+    { "waveId": 2, "enemyType": "enemy_normal_01", "enemyCount": 16, "spawnInterval": 0.8, "hpMultiplier": 1.2, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["normal"], "hint": "普通怪增多，注意补塔。" },
+    { "waveId": 3, "enemyType": "enemy_fast_01", "enemyCount": 18, "spawnInterval": 0.6, "hpMultiplier": 1.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["fast"], "hint": "高速怪来袭，考虑减速塔。" },
+    { "waveId": 4, "enemyType": "enemy_armor_01", "enemyCount": 14, "spawnInterval": 0.9, "hpMultiplier": 1.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["armored"], "hint": "重甲怪护甲高，破甲法师可破解。" },
+    { "waveId": 5, "enemyType": "enemy_boss_01", "enemyCount": 1, "spawnInterval": 2.0, "hpMultiplier": 0.4, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "bossExtraGold": 80, "tags": ["boss"], "hint": "小Boss！集火并用控制拖住它。" },
+    { "waveId": 6, "enemyType": "enemy_normal_01", "enemyCount": 20, "spawnInterval": 0.7, "hpMultiplier": 1.6, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["normal"], "hint": "普通怪强化。" },
+    { "waveId": 7, "enemyType": "enemy_tank_01", "enemyCount": 10, "spawnInterval": 1.2, "hpMultiplier": 1.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["tank"], "hint": "高血怪，价值高，是偷钱好目标。" },
+    { "waveId": 8, "enemyType": "enemy_fast_01", "enemyCount": 24, "spawnInterval": 0.5, "hpMultiplier": 1.3, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["fast"], "hint": "高速潮，靠减速与冰霜。" },
+    { "waveId": 9, "enemyType": "enemy_magic_01", "enemyCount": 16, "spawnInterval": 0.8, "hpMultiplier": 1.2, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["magicresist"], "hint": "魔抗怪：法师/冰霜伤害打折，靠怪盗与弓箭的物理伤害。" },
+    { "waveId": 10, "enemyType": "enemy_flying_01", "enemyCount": 20, "spawnInterval": 0.8, "hpMultiplier": 1.2, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["air"], "hint": "空军来袭！只有弓箭塔/空盗/英雄(带飞行符)能攻击它们。" },
+    { "waveId": 11, "enemyType": "enemy_normal_01", "enemyCount": 24, "spawnInterval": 0.6, "hpMultiplier": 2.2, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["normal"], "hint": "普通怪血量上升。" },
+    { "waveId": 12, "enemyType": "enemy_armor_01", "enemyCount": 18, "spawnInterval": 0.8, "hpMultiplier": 1.5, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["armored"], "hint": "高甲怪，升级破甲研究科技。" },
+    { "waveId": 13, "enemyType": "enemy_normal_01", "enemyCount": 32, "spawnInterval": 0.4, "hpMultiplier": 1.5, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["swarm"], "hint": "数量潮：大量怪物，注意范围覆盖。" },
+    { "waveId": 14, "enemyType": "enemy_fast_01", "enemyCount": 30, "spawnInterval": 0.4, "hpMultiplier": 1.6, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["fast", "pressure"], "hint": "高速压力波，冰冻能救命。" },
+    { "waveId": 15, "enemyType": "enemy_boss_01", "enemyCount": 1, "spawnInterval": 2.0, "hpMultiplier": 1.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.5, "bossExtraGold": 200, "tags": ["boss"], "hint": "Boss！掉落额外金币，是偷钱暴利目标。" },
+    { "waveId": 16, "enemyType": "enemy_normal_01", "enemyCount": 24, "spawnInterval": 0.6, "hpMultiplier": 3.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["normal"], "hint": "强化普通怪。" },
+    { "waveId": 17, "enemyType": "enemy_magic_01", "enemyCount": 20, "spawnInterval": 0.7, "hpMultiplier": 1.8, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["magicresist"], "hint": "近乎魔免，物理输出为主。" },
+    { "waveId": 18, "enemyType": "enemy_flying_01", "enemyCount": 24, "spawnInterval": 0.6, "hpMultiplier": 1.5, "speedMultiplier": 1.3, "rewardMultiplier": 1.0, "tags": ["air", "fast"], "hint": "高速空军！补足防空与防空训练科技。" },
+    { "waveId": 19, "enemyType": "enemy_lowvalue_01", "enemyCount": 30, "spawnInterval": 0.5, "hpMultiplier": 2.5, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["lowvalue"], "hint": "低收益怪：偷钱与击杀都少，别指望靠它发财。" },
+    { "waveId": 20, "enemyType": "enemy_boss_01", "enemyCount": 1, "spawnInterval": 2.0, "hpMultiplier": 2.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.5, "bossExtraGold": 350, "tags": ["boss"], "hint": "大Boss！集火、控制、偷到爆。" },
+    { "waveId": 21, "enemyType": "enemy_normal_01", "enemyCount": 28, "spawnInterval": 0.55, "hpMultiplier": 4.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["normal"], "hint": "高强度普通怪。" },
+    { "waveId": 22, "enemyType": "enemy_tank_01", "enemyCount": 14, "spawnInterval": 1.0, "hpMultiplier": 1.6, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["tank", "shield"], "hint": "护盾肉怪（用高血怪替代），需要持续高DPS。" },
+    { "waveId": 23, "enemyType": "enemy_fast_01", "enemyCount": 30, "spawnInterval": 0.4, "hpMultiplier": 2.2, "speedMultiplier": 1.2, "rewardMultiplier": 1.0, "tags": ["fast", "rush"], "hint": "冲刺怪！冰冻和减速优先。" },
+    { "waveId": 24, "enemyType": "enemy_normal_01", "enemyCount": 36, "spawnInterval": 0.4, "hpMultiplier": 2.5, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["summon", "swarm"], "hint": "召唤潮（用普通怪替代），海量目标。" },
+    { "waveId": 25, "enemyType": "enemy_boss_01", "enemyCount": 2, "spawnInterval": 3.0, "hpMultiplier": 1.5, "speedMultiplier": 1.0, "rewardMultiplier": 1.4, "bossExtraGold": 300, "tags": ["boss"], "hint": "双Boss！偷钱大丰收，但别让它们漏掉。" },
+    { "waveId": 26, "enemyType": "enemy_fast_01", "enemyCount": 18, "spawnInterval": 0.5, "hpMultiplier": 2.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["fast", "armored", "mixed"], "hint": "高速+高甲混合波。",
+      "groups": [
+        { "enemyType": "enemy_fast_01", "enemyCount": 18, "spawnInterval": 0.5, "hpMultiplier": 2.0, "speedMultiplier": 1.0 },
+        { "enemyType": "enemy_armor_01", "enemyCount": 10, "spawnInterval": 0.9, "hpMultiplier": 1.8, "speedMultiplier": 1.0 }
+      ]
+    },
+    { "waveId": 27, "enemyType": "enemy_flying_01", "enemyCount": 16, "spawnInterval": 0.6, "hpMultiplier": 1.8, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["air", "magicresist", "mixed"], "hint": "飞行+魔抗混合波，物理防空是关键。",
+      "groups": [
+        { "enemyType": "enemy_flying_01", "enemyCount": 16, "spawnInterval": 0.6, "hpMultiplier": 1.8, "speedMultiplier": 1.0 },
+        { "enemyType": "enemy_magic_01", "enemyCount": 14, "spawnInterval": 0.7, "hpMultiplier": 2.0, "speedMultiplier": 1.0 }
+      ]
+    },
+    { "waveId": 28, "enemyType": "enemy_thief_01", "enemyCount": 20, "spawnInterval": 0.7, "hpMultiplier": 2.0, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["goldthief"], "hint": "窃金怪！每漏一只额外扣你40金币，绝对不能放过去。" },
+    { "waveId": 29, "enemyType": "enemy_normal_01", "enemyCount": 16, "spawnInterval": 0.5, "hpMultiplier": 2.5, "speedMultiplier": 1.0, "rewardMultiplier": 1.0, "tags": ["mixed", "all"], "hint": "全类型混合波，全面防御。",
+      "groups": [
+        { "enemyType": "enemy_normal_01", "enemyCount": 16, "spawnInterval": 0.5, "hpMultiplier": 2.5, "speedMultiplier": 1.0 },
+        { "enemyType": "enemy_fast_01", "enemyCount": 14, "spawnInterval": 0.5, "hpMultiplier": 2.2, "speedMultiplier": 1.1 },
+        { "enemyType": "enemy_armor_01", "enemyCount": 10, "spawnInterval": 0.8, "hpMultiplier": 2.0, "speedMultiplier": 1.0 },
+        { "enemyType": "enemy_flying_01", "enemyCount": 10, "spawnInterval": 0.8, "hpMultiplier": 2.0, "speedMultiplier": 1.0 },
+        { "enemyType": "enemy_magic_01", "enemyCount": 8, "spawnInterval": 0.9, "hpMultiplier": 2.0, "speedMultiplier": 1.0 }
+      ]
+    },
+    { "waveId": 30, "enemyType": "enemy_boss_02", "enemyCount": 1, "spawnInterval": 2.0, "hpMultiplier": 1.0, "speedMultiplier": 1.0, "rewardMultiplier": 2.0, "bossExtraGold": 1000, "tags": ["boss", "final"], "hint": "终局Boss · 盗贼君王！全力以赴，守住胜利。" }
+  ]
+}

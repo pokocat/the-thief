@@ -1,0 +1,63 @@
+{
+  "enemy_normal_01": {
+    "id": "enemy_normal_01", "name": "哥布林小偷", "model": "goblin",
+    "maxHp": 120, "armor": 1, "magicResist": 0, "speed": 1.0,
+    "goldReward": 12, "valueMultiplier": 1.0, "isFlying": false,
+    "controlResist": 0, "scale": 1.0, "color": "#7cb342", "tags": ["ground", "normal"]
+  },
+  "enemy_fast_01": {
+    "id": "enemy_fast_01", "name": "疾行盗怪", "model": "runner",
+    "maxHp": 90, "armor": 1, "magicResist": 0, "speed": 1.8,
+    "goldReward": 14, "valueMultiplier": 1.2, "isFlying": false,
+    "controlResist": 0, "scale": 0.9, "color": "#26c6da", "tags": ["ground", "fast"]
+  },
+  "enemy_armor_01": {
+    "id": "enemy_armor_01", "name": "铁桶怪", "model": "barrel",
+    "maxHp": 220, "armor": 8, "magicResist": 0, "speed": 0.8,
+    "goldReward": 20, "valueMultiplier": 1.0, "isFlying": false,
+    "controlResist": 0, "scale": 1.1, "color": "#90a4ae", "tags": ["ground", "armored"]
+  },
+  "enemy_tank_01": {
+    "id": "enemy_tank_01", "name": "大肚怪", "model": "blob",
+    "maxHp": 600, "armor": 3, "magicResist": 0, "speed": 0.7,
+    "goldReward": 30, "valueMultiplier": 1.3, "isFlying": false,
+    "controlResist": 0.2, "scale": 1.4, "color": "#8d6e63", "tags": ["ground", "tank"]
+  },
+  "enemy_flying_01": {
+    "id": "enemy_flying_01", "name": "气球盗怪", "model": "balloon",
+    "maxHp": 150, "armor": 0, "magicResist": 0, "speed": 1.2,
+    "goldReward": 18, "valueMultiplier": 1.1, "isFlying": true,
+    "controlResist": 0, "scale": 1.0, "color": "#ef5350", "tags": ["air", "flying"]
+  },
+  "enemy_magic_01": {
+    "id": "enemy_magic_01", "name": "魔抗怪", "model": "rune",
+    "maxHp": 200, "armor": 2, "magicResist": 0.6, "speed": 0.9,
+    "goldReward": 22, "valueMultiplier": 1.1, "isFlying": false,
+    "controlResist": 0.3, "scale": 1.05, "color": "#ab47bc", "tags": ["ground", "magicresist"]
+  },
+  "enemy_lowvalue_01": {
+    "id": "enemy_lowvalue_01", "name": "穷酸怪", "model": "goblin",
+    "maxHp": 140, "armor": 1, "magicResist": 0, "speed": 1.1,
+    "goldReward": 4, "valueMultiplier": 0.4, "isFlying": false,
+    "controlResist": 0, "scale": 0.85, "color": "#a1887f", "tags": ["ground", "lowvalue"]
+  },
+  "enemy_thief_01": {
+    "id": "enemy_thief_01", "name": "窃金怪", "model": "bagthief",
+    "maxHp": 180, "armor": 2, "magicResist": 0.1, "speed": 1.3,
+    "goldReward": 15, "valueMultiplier": 1.5, "isFlying": false,
+    "controlResist": 0.1, "scale": 1.05, "color": "#ffb300", "goldStealOnLeak": 40,
+    "tags": ["ground", "goldthief"]
+  },
+  "enemy_boss_01": {
+    "id": "enemy_boss_01", "name": "盗匪头目", "model": "boss",
+    "maxHp": 4000, "armor": 6, "magicResist": 0.3, "speed": 0.6,
+    "goldReward": 200, "valueMultiplier": 3.0, "isFlying": false,
+    "controlResist": 0.7, "scale": 2.0, "color": "#d84315", "tags": ["ground", "boss"]
+  },
+  "enemy_boss_02": {
+    "id": "enemy_boss_02", "name": "盗贼君王", "model": "boss",
+    "maxHp": 22000, "armor": 10, "magicResist": 0.4, "speed": 0.55,
+    "goldReward": 600, "valueMultiplier": 4.0, "isFlying": false,
+    "controlResist": 0.7, "scale": 2.6, "color": "#6a1b9a", "tags": ["ground", "boss", "final"]
+  }
+}
