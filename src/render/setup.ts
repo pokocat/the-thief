@@ -70,21 +70,16 @@ export function setupVisuals(scene: Scene, camera: Camera): ShadowGenerator {
   pipe.fxaaEnabled = true;
   pipe.samples = 4;
 
-  pipe.bloomEnabled = true;
-  pipe.bloomThreshold = 0.72;
-  pipe.bloomWeight = 0.65;
-  pipe.bloomKernel = 64;
-  pipe.bloomScale = 0.6;
+  // bloom/glow halos disabled (they wash out the models); vignette off too
+  pipe.bloomEnabled = false;
 
   pipe.imageProcessingEnabled = true;
   const ip = pipe.imageProcessing;
   ip.toneMappingEnabled = true;
   ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
-  ip.exposure = 1.3;
-  ip.contrast = 1.08;
-  ip.vignetteEnabled = true;
-  ip.vignetteWeight = 2.2;
-  ip.vignetteColor = new Color4(0.05, 0.03, 0.1, 1);
+  ip.exposure = 1.25;
+  ip.contrast = 1.05;
+  ip.vignetteEnabled = false;
 
   return sg;
 }
