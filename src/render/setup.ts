@@ -28,21 +28,26 @@ export function setupVisuals(scene: Scene, camera: Camera): ShadowGenerator {
 
   // --- lights ---
   const hemi = new HemisphericLight("hemi", new Vector3(0.1, 1, 0.2), scene);
-  hemi.intensity = 0.65;
+  hemi.intensity = 0.95;
   hemi.diffuse = new Color3(1.0, 0.96, 0.85); // warm sky
-  hemi.groundColor = new Color3(0.32, 0.28, 0.45); // cool bounce
+  hemi.groundColor = new Color3(0.45, 0.42, 0.55); // cool bounce fill
 
   const key = new DirectionalLight("key", new Vector3(-0.55, -1, -0.45), scene);
   key.position = new Vector3(40, 70, 35);
-  key.intensity = 1.45;
+  key.intensity = 1.5;
   key.diffuse = new Color3(1.0, 0.93, 0.78);
+
+  // soft fill from the opposite side so back-lit characters don't go black
+  const fill = new DirectionalLight("fill", new Vector3(0.5, -0.4, 0.6), scene);
+  fill.intensity = 0.45;
+  fill.diffuse = new Color3(0.7, 0.78, 1.0);
 
   // --- soft shadows ---
   const sg = new ShadowGenerator(1024, key);
   sg.useBlurExponentialShadowMap = true;
   sg.blurKernel = 24;
   sg.depthScale = 50;
-  sg.darkness = 0.45;
+  sg.darkness = 0.6;
   sg.bias = 0.0015;
   setShadowGenerator(sg);
 
@@ -75,8 +80,8 @@ export function setupVisuals(scene: Scene, camera: Camera): ShadowGenerator {
   const ip = pipe.imageProcessing;
   ip.toneMappingEnabled = true;
   ip.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
-  ip.exposure = 1.15;
-  ip.contrast = 1.25;
+  ip.exposure = 1.3;
+  ip.contrast = 1.08;
   ip.vignetteEnabled = true;
   ip.vignetteWeight = 2.2;
   ip.vignetteColor = new Color4(0.05, 0.03, 0.1, 1);

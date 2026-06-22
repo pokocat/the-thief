@@ -1,0 +1,178 @@
+[
+  {
+    "slot": "enemy_goblin",
+    "term": "goblin",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/S7jYW6Amye",
+    "kb": 429
+  },
+  {
+    "slot": "enemy_skeleton",
+    "term": "skeleton enemy",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/TX8r9WBXpe",
+    "kb": 226
+  },
+  {
+    "slot": "enemy_slime",
+    "term": "slime",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/LyjSUKHKnh",
+    "kb": 170
+  },
+  {
+    "slot": "enemy_orc",
+    "term": "orc",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/5vO2YJsPEf",
+    "kb": 500
+  },
+  {
+    "slot": "enemy_bat",
+    "term": "bat",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/hNO9XvjlKa",
+    "kb": 226
+  },
+  {
+    "slot": "enemy_ghost",
+    "term": "ghost",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/TX8r9WBXpe",
+    "kb": 226
+  },
+  {
+    "slot": "enemy_demon",
+    "term": "demon",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/LnfIziKv4o",
+    "kb": 474
+  },
+  {
+    "slot": "enemy_dragon",
+    "term": "dragon",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/VBvzjFIYws",
+    "kb": 262
+  },
+  {
+    "slot": "tower_knight",
+    "term": "knight",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/I1gTjmuK2m",
+    "kb": 1957
+  },
+  {
+    "slot": "tower_wizard",
+    "term": "wizard",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/tabnmuxQBl",
+    "kb": 290
+  },
+  {
+    "slot": "tower_archer",
+    "term": "archer",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/IA5qOjIAiT",
+    "kb": 610
+  },
+  {
+    "slot": "tower_barbarian",
+    "term": "warrior",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/y9KWOVG21R",
+    "kb": 1561
+  },
+  {
+    "slot": "tower_rogue",
+    "term": "ninja",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/xGYmeDpfTu",
+    "kb": 446
+  },
+  {
+    "slot": "prop_pine",
+    "term": "pine tree",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/oYtDty0fR6",
+    "kb": 97
+  },
+  {
+    "slot": "prop_tree",
+    "term": "tree",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/etFGNvsiFv",
+    "kb": 3328
+  },
+  {
+    "slot": "prop_rock",
+    "term": "rock",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/OQvi8PIZ40",
+    "kb": 5
+  },
+  {
+    "slot": "prop_crystal",
+    "term": "crystal",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/STixpWYaTd",
+    "kb": 88
+  },
+  {
+    "slot": "prop_barrel",
+    "term": "barrel",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/ONdghDBByN",
+    "kb": 73
+  },
+  {
+    "slot": "prop_chest",
+    "term": "treasure chest",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/O72u4Drp8k",
+    "kb": 93
+  },
+  {
+    "slot": "prop_mushroom",
+    "term": "mushroom",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/db1tjMhmiA",
+    "kb": 10
+  },
+  {
+    "slot": "prop_fence",
+    "term": "fence",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/e02PFKKhbr",
+    "kb": 10
+  },
+  {
+    "slot": "prop_torch",
+    "term": "torch",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/Gq38E7hFZw",
+    "kb": 22
+  }
+]

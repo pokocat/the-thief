@@ -8,6 +8,7 @@ import {
   ParticleSystem,
 } from "../bjs";
 import { flatMat, toonMat, glowMat, translucentMat, applyToonStyle, softCircleTexture, bumpyMat } from "../entities/models/materials";
+import { instantiate, Slot } from "../render/Assets";
 import { PathSystem } from "./PathSystem";
 import type { MapData } from "../config/types";
 import { randRange, rand } from "../util/math";
@@ -166,35 +167,23 @@ export class SceneBuilder {
 
   private placeDecoration(x: number, z: number): void {
     const r = rand();
-    if (r < 0.38) this.tree(x, z);
-    else if (r < 0.56) this.rock(x, z);
-    else if (r < 0.72) this.grass(x, z);
-    else if (r < 0.82) this.mushroom(x, z);
-    else if (r < 0.9) this.crystal(x, z);
+    if (r < 0.26) this.prop("prop_tree", x, z, randRange(2.8, 4.2));
+    else if (r < 0.40) this.prop("prop_pine", x, z, randRange(2.4, 3.4));
+    else if (r < 0.55) this.prop("prop_rock", x, z, randRange(0.5, 1.2));
+    else if (r < 0.66) this.grass(x, z);
+    else if (r < 0.76) this.prop("prop_mushroom", x, z, randRange(0.4, 0.8));
+    else if (r < 0.85) this.prop("prop_crystal", x, z, randRange(0.9, 1.6));
+    else if (r < 0.92) this.prop("prop_fence", x, z, 1.0);
     else this.torch(x, z);
   }
 
-  private tree(x: number, z: number): void {
-    const t = new TransformNode("tree", this.scene);
+  // place a CC0 glb prop, scaled + randomly rotated
+  private prop(slot: Slot, x: number, z: number, height: number): void {
+    const t = new TransformNode(slot, this.scene);
     t.position.set(x, 0, z);
-    const sc = randRange(0.9, 1.6);
-    cyl(this.scene, t, toonMat(this.scene, "#7a5230"), 0.32, 0.46, 1.3 * sc, [0, 0.65 * sc, 0]);
-    for (let i = 0; i < 3; i++) {
-      const leaf = MeshBuilder.CreateSphere("leaf", { diameter: (1.9 - i * 0.4) * sc, segments: 8 }, this.scene);
-      leaf.parent = t; leaf.position.y = (1.5 + i * 0.7) * sc;
-      leaf.material = toonMat(this.scene, i % 2 ? "#3aa050" : "#2f8a42");
-    }
+    instantiate(slot, height, t);
     t.rotation.y = randRange(0, 6.28);
-    applyToonStyle(t, 0.05);
-  }
-
-  private rock(x: number, z: number): void {
-    const t = new TransformNode("rock", this.scene);
-    t.position.set(x, 0, z);
-    const sc = randRange(0.6, 1.3);
-    const rk = MeshBuilder.CreateSphere("rock", { diameter: sc, segments: 4 }, this.scene);
-    rk.parent = t; rk.position.y = sc * 0.32; rk.scaling.y = 0.7; rk.material = toonMat(this.scene, "#8c8c98"); rk.convertToFlatShadedMesh();
-    applyToonStyle(t, 0.04);
+    applyToonStyle(t, 0.02);
   }
 
   private grass(x: number, z: number): void {
@@ -208,36 +197,12 @@ export class SceneBuilder {
     applyToonStyle(t, 0.03);
   }
 
-  private mushroom(x: number, z: number): void {
-    const t = new TransformNode("mush", this.scene);
-    t.position.set(x, 0, z);
-    const sc = randRange(0.5, 1.0);
-    cyl(this.scene, t, toonMat(this.scene, "#efe6d2"), 0.18 * sc, 0.22 * sc, 0.5 * sc, [0, 0.25 * sc, 0]);
-    const cap = MeshBuilder.CreateSphere("cap", { diameter: 0.7 * sc, segments: 8 }, this.scene);
-    cap.parent = t; cap.position.y = 0.5 * sc; cap.scaling.y = 0.6; cap.material = toonMat(this.scene, rand() > 0.5 ? "#e0533f" : "#d24fb0");
-    applyToonStyle(t, 0.04);
-  }
-
-  private crystal(x: number, z: number): void {
-    const t = new TransformNode("crystalDeco", this.scene);
-    t.position.set(x, 0, z);
-    const col = rand() > 0.5 ? "#7fd0ff" : "#c98aff";
-    for (let i = 0; i < 3; i++) {
-      const c = MeshBuilder.CreateCylinder("cr", { diameterTop: 0, diameterBottom: randRange(0.2, 0.35), height: randRange(0.8, 1.5), tessellation: 5 }, this.scene);
-      c.parent = t; c.position.set(randRange(-0.25, 0.25), 0.4, randRange(-0.25, 0.25)); c.rotation.z = randRange(-0.3, 0.3);
-      c.material = glowMat(this.scene, col, 1.0); c.convertToFlatShadedMesh();
-    }
-    applyToonStyle(t, 0.04);
-  }
-
   private torch(x: number, z: number): void {
     const t = new TransformNode("torch", this.scene);
     t.position.set(x, 0, z);
-    cyl(this.scene, t, toonMat(this.scene, "#5a3f28"), 0.16, 0.22, 1.7, [0, 0.85, 0]);
-    const bowl = MeshBuilder.CreateCylinder("bowl", { diameterTop: 0.5, diameterBottom: 0.3, height: 0.3, tessellation: 8 }, this.scene);
-    bowl.parent = t; bowl.position.y = 1.75; bowl.material = toonMat(this.scene, "#3a3340");
-    applyToonStyle(t, 0.04);
-    this.fireParticles(new Vector3(x, 1.95, z));
+    instantiate("prop_torch", 1.8, t);
+    applyToonStyle(t, 0.03);
+    this.fireParticles(new Vector3(x, 1.7, z));
   }
 
   private fireParticles(pos: Vector3): void {

@@ -1,11 +1,13 @@
 import { MeshBuilder, TransformNode, Mesh, Scene, Material } from "../../bjs";
 import { toonMat, glowMat, translucentMat, applyToonStyle } from "./materials";
 import type { TowerConfig, EnemyConfig } from "../../config/types";
+import type { AnimController } from "../../render/Assets";
 
 export interface TowerVisual {
   root: TransformNode;
   head: TransformNode; // rotates / lunges toward target
   muzzleHeight: number;
+  anim?: AnimController;
 }
 
 export interface LimbAnim {
@@ -20,7 +22,10 @@ export interface EnemyVisual {
   topY: number;
   slowRing: Mesh;
   freezeBox: Mesh;
-  limbs: LimbAnim[]; // animated legs/arms (procedural walk cycle)
+  limbs: LimbAnim[]; // procedural walk cycle (empty for skeletal-animated glb models)
+  anim?: AnimController; // skeletal animation controller (glb models)
+  moveClips?: string[];
+  deathClips?: string[];
 }
 
 // --- primitive helpers (each takes a shared toon/glow material) ------------

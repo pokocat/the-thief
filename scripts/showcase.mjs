@@ -10,7 +10,8 @@ const page = await browser.newPage({ viewport: { width: 1100, height: 620 }, dev
 page.on("pageerror", (e) => console.log("PAGE EXCEPTION:", e.message));
 await page.goto(URL, { waitUntil: "domcontentloaded" });
 await page.waitForSelector("#renderCanvas");
-await page.waitForTimeout(6000);
+await page.waitForFunction(() => !!window.heistTD, null, { timeout: 90000 });
+await page.waitForTimeout(4000);
 
 const shot = async (name) => { await page.screenshot({ path: `shots/${name}.png`, timeout: 120000 }); console.log("saved", name); };
 

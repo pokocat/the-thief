@@ -1,6 +1,7 @@
 import { Vector3, MeshBuilder, Mesh, Scene } from "../bjs";
 import { translucentMat } from "./models/materials";
-import { buildTowerModel, TowerVisual } from "./models/ModelFactory";
+import type { TowerVisual } from "./models/ModelFactory";
+import { buildTowerGlb, towerAttackClips, towerIdleClips } from "../render/GlbBuild";
 import type { TowerConfig, ItemConfig, TargetMode } from "../config/types";
 import type { GameContext } from "../core/Context";
 import { selectTargets } from "../systems/TargetingSystem";
@@ -32,7 +33,7 @@ export class Tower {
     this.position = position;
     this.padIndex = padIndex;
     this.investedGold = cfg.cost;
-    this.visual = buildTowerModel(scene, cfg);
+    this.visual = buildTowerGlb(scene, cfg);
     this.visual.root.position.copyFrom(position);
 
     // invisible pick collider
@@ -95,8 +96,7 @@ export class Tower {
   update(dt: number, ctx: GameContext): void {
     // idle bob + attack pulse
     this.attackPulse = Math.max(0, this.attackPulse - dt * 4);
-    this.visual.head.scaling.setAll(1 + this.attackPulse * 0.12);
-    this.visual.head.position.y = 0.5 + Math.sin(ctx.time * 2 + this.uid) * 0.03;
+    this.visual.head.position.y = 0.56 + Math.sin(ctx.time * 2 + this.uid) * 0.03;
 
     this.cooldown -= dt;
     if (this.cooldown > 0) return;
@@ -109,6 +109,8 @@ export class Tower {
     this.cooldown = this.effectiveAttackInterval(ctx);
     this.attackPulse = 1;
     this.hitCount += 1;
+    const atk = towerAttackClips(this.cfg.model);
+    if (atk.length) this.visual.anim?.playOneShot(atk, towerIdleClips(this.cfg.model));
 
     // face primary target
     const primary = targets[0];
@@ -161,7 +163,7 @@ export class Tower {
     this.cfg = newCfg;
     // rebuild visual
     this.visual.root.dispose();
-    this.visual = buildTowerModel(this.scene, newCfg);
+    this.visual = buildTowerGlb(this.scene, newCfg);
     this.visual.root.position.copyFrom(this.position);
     this.rangeRing.dispose();
     this.rangeRing = MeshBuilder.CreateTorus(`range_${this.uid}`, { diameter: newCfg.range * 2, thickness: 0.12, tessellation: 36 }, this.scene);

@@ -11,6 +11,7 @@ import { CameraController } from "./CameraController";
 import { WaveSystem } from "../systems/WaveSystem";
 import { UI } from "../ui/UI";
 import { setupVisuals } from "../render/setup";
+import { preloadModels } from "../render/Assets";
 import { bus } from "./Events";
 import type { GameContext } from "./Context";
 
@@ -19,10 +20,10 @@ const FIXED_DT = 1 / 60;
 export class Game {
   private engine: Engine;
   private scene: Scene;
-  private ctx: GameContext;
-  private waves: WaveSystem;
-  private ui: UI;
-  private overlay: WorldOverlay;
+  private ctx!: GameContext;
+  private waves!: WaveSystem;
+  private ui!: UI;
+  private overlay!: WorldOverlay;
   private accumulator = 0;
   private timeScale = 1;
   private slowmo = 0;
@@ -30,9 +31,26 @@ export class Game {
   constructor(private canvas: HTMLCanvasElement) {
     this.engine = new Engine(canvas, true, { preserveDrawingBuffer: false, stencil: false }, true);
     this.scene = new Scene(this.engine);
+    void this.init();
+  }
+
+  private setLoading(text: string): void {
+    let el = document.getElementById("loading");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "loading";
+      document.getElementById("ui-root")!.appendChild(el);
+    }
+    el.textContent = text;
+  }
+
+  private async init(): Promise<void> {
+    this.setLoading("加载美术资源…");
+    await preloadModels(this.scene, (d, t) => this.setLoading(`加载美术资源… ${d}/${t}`));
+    document.getElementById("loading")?.remove();
 
     const path = new PathSystem(GameMap);
-    const camera = new CameraController(this.scene, canvas, GameMap);
+    const camera = new CameraController(this.scene, this.canvas, GameMap);
 
     // lights, soft shadows, gradient sky, fog, bloom/ACES pipeline
     setupVisuals(this.scene, camera.camera);

@@ -1,6 +1,7 @@
 import { Vector3, Scene } from "../bjs";
 import { Enemy } from "./Enemy";
-import { buildEnemyModel, EnemyVisual } from "./models/ModelFactory";
+import type { EnemyVisual } from "./models/ModelFactory";
+import { buildEnemyGlb } from "../render/GlbBuild";
 import { ObjectPool } from "../core/ObjectPool";
 import { PathSystem } from "../map/PathSystem";
 import { GameState } from "../core/GameState";
@@ -36,15 +37,17 @@ export class EnemyManager {
   private getVisual(cfg: EnemyConfig): EnemyVisual {
     const pool = this.visualPools.get(cfg.id);
     if (pool && pool.length) return pool.pop()!;
-    return buildEnemyModel(this.scene, cfg);
+    return buildEnemyGlb(this.scene, cfg);
   }
 
   private releaseVisual(cfg: EnemyConfig, v: EnemyVisual): void {
     v.root.setEnabled(false);
+    v.root.scaling.setAll(1);
+    v.root.rotation.z = 0;
     v.slowRing.setEnabled(false);
     v.freezeBox.setEnabled(false);
     v.body.position.y = 0;
-    for (const L of v.limbs) L.pivot.rotation.x = 0;
+    v.anim?.stopAll();
     let pool = this.visualPools.get(cfg.id);
     if (!pool) {
       pool = [];
@@ -63,6 +66,7 @@ export class EnemyManager {
     const y = cfg.isFlying ? Balance.flyingHeight : 0;
     this.path.sample(0, e.pos, y);
     visual.root.position.copyFrom(e.pos);
+    visual.anim?.play(visual.moveClips ?? [], true);
     this.active.push(e);
     return e;
   }
@@ -90,7 +94,8 @@ export class EnemyManager {
     }
     enemy.visual.slowRing.setEnabled(false);
     enemy.visual.freezeBox.setEnabled(false);
-    this.dying.push({ enemy, age: 0, life: 0.4 });
+    enemy.visual.anim?.play(enemy.visual.deathClips ?? ["Death"], false);
+    this.dying.push({ enemy, age: 0, life: 1.0 });
   }
 
   private reachGoal(enemy: Enemy): void {
@@ -129,8 +134,10 @@ export class EnemyManager {
       v.root.position.copyFrom(e.pos);
       v.root.rotation.y = heading;
 
-      // walk cycle: body bob + limb swing (only while moving)
-      if (speed > 0.01) {
+      // skeletal animation: pause while frozen, otherwise play at normal speed
+      v.anim?.setSpeed(time < e.frozenUntil ? 0 : 1);
+      // (procedural fallback for any non-glb visuals with limbs)
+      if (v.limbs.length && speed > 0.01) {
         const gait = time * 9 + e.uid;
         v.body.position.y = Math.abs(Math.sin(gait)) * 0.1;
         for (const L of v.limbs) L.pivot.rotation.x = Math.sin(gait + L.phase) * L.amp;
@@ -148,13 +155,15 @@ export class EnemyManager {
       d.age += dt;
       const k = d.age / d.life;
       const v = d.enemy.visual;
-      v.root.position.y = d.enemy.pos.y + k * 1.2; // pop up
-      v.root.scaling.setAll(Math.max(0.01, 1 - k));
-      v.root.rotation.z = k * 1.5;
+      // let the death clip play; shrink+sink only in the last 30%
+      if (k > 0.7) {
+        const f = (k - 0.7) / 0.3;
+        v.root.scaling.setAll(Math.max(0.01, 1 - f));
+        v.root.position.y = d.enemy.pos.y - f * 0.4;
+      }
       if (k >= 1) {
         v.root.scaling.setAll(1);
-        v.root.rotation.z = 0;
-        v.body.position.y = 0;
+        v.root.position.y = d.enemy.pos.y;
         this.recycle(d.enemy);
         this.dying.splice(i, 1);
       }
