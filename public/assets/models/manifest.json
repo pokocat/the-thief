@@ -8,22 +8,6 @@
     "kb": 429
   },
   {
-    "slot": "enemy_skeleton",
-    "term": "skeleton enemy",
-    "creator": "Quaternius",
-    "license": "CC0",
-    "source": "https://poly.pizza/m/TX8r9WBXpe",
-    "kb": 226
-  },
-  {
-    "slot": "enemy_slime",
-    "term": "slime",
-    "creator": "Quaternius",
-    "license": "CC0",
-    "source": "https://poly.pizza/m/LyjSUKHKnh",
-    "kb": 170
-  },
-  {
     "slot": "enemy_orc",
     "term": "orc",
     "creator": "Quaternius",
@@ -37,14 +21,6 @@
     "creator": "Quaternius",
     "license": "CC0",
     "source": "https://poly.pizza/m/hNO9XvjlKa",
-    "kb": 226
-  },
-  {
-    "slot": "enemy_ghost",
-    "term": "ghost",
-    "creator": "Quaternius",
-    "license": "CC0",
-    "source": "https://poly.pizza/m/TX8r9WBXpe",
     "kb": 226
   },
   {
@@ -86,14 +62,6 @@
     "license": "CC0",
     "source": "https://poly.pizza/m/IA5qOjIAiT",
     "kb": 610
-  },
-  {
-    "slot": "tower_barbarian",
-    "term": "warrior",
-    "creator": "Quaternius",
-    "license": "CC0",
-    "source": "https://poly.pizza/m/y9KWOVG21R",
-    "kb": 1561
   },
   {
     "slot": "tower_rogue",
@@ -222,5 +190,45 @@
     "license": "CC0",
     "source": "https://poly.pizza/m/nFwrlcLvM5",
     "kb": 10
+  },
+  {
+    "slot": "enemy_skeleton",
+    "term": "skeleton warrior",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/yq5ATpujSt",
+    "kb": 773
+  },
+  {
+    "slot": "enemy_ogre",
+    "term": "ogre",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/BldaiPtyJa",
+    "kb": 239
+  },
+  {
+    "slot": "enemy_necromancer",
+    "term": "necromancer",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/o87Upt5uHX",
+    "kb": 87
+  },
+  {
+    "slot": "enemy_spider",
+    "term": "spider",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/yRYJiAJyiM",
+    "kb": 438
+  },
+  {
+    "slot": "enemy_werewolf",
+    "term": "werewolf",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/P1gU3Qkr9r",
+    "kb": 963
   }
 ]

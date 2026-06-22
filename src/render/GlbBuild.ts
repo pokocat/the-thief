@@ -20,16 +20,16 @@ interface TowerReg { slot: Slot; height: number; idle: string[]; attack: string[
 
 const DEATH = ["Death"];
 
-// enemy config id -> CC0 model + clip mapping
+// enemy config id -> CC0 Warcraft-flavored monster + clip mapping
 const ENEMY: Record<string, EnemyReg> = {
   enemy_normal_01: { slot: "enemy_goblin", height: 1.8, move: ["Walk"], death: DEATH, yaw: Math.PI },
-  enemy_fast_01: { slot: "enemy_goblin", height: 1.6, move: ["Run", "Walk"], death: DEATH, yaw: Math.PI },
+  enemy_fast_01: { slot: "enemy_werewolf", height: 1.6, move: ["Gallop", "Run", "Walk"], death: DEATH, yaw: Math.PI },
   enemy_armor_01: { slot: "enemy_orc", height: 1.9, move: ["Walk"], death: DEATH, yaw: Math.PI },
-  enemy_tank_01: { slot: "enemy_orc", height: 2.6, move: ["Walk"], death: DEATH, yaw: Math.PI },
+  enemy_tank_01: { slot: "enemy_ogre", height: 2.7, move: ["Walk"], death: DEATH, yaw: Math.PI },
   enemy_flying_01: { slot: "enemy_bat", height: 1.7, move: ["Flying", "Fast_Flying"], death: DEATH, yaw: Math.PI },
-  enemy_magic_01: { slot: "enemy_ghost", height: 1.9, move: ["Flying", "Flying_Idle"], death: DEATH, yaw: Math.PI },
-  enemy_lowvalue_01: { slot: "enemy_slime", height: 1.4, move: ["Slime_Walk", "Walk"], death: ["Slime_Death", "Death"], yaw: Math.PI },
-  enemy_thief_01: { slot: "enemy_goblin", height: 1.8, move: ["Run", "Walk"], death: DEATH, yaw: Math.PI },
+  enemy_magic_01: { slot: "enemy_necromancer", height: 2.0, move: ["Walk"], death: DEATH, yaw: Math.PI },
+  enemy_lowvalue_01: { slot: "enemy_spider", height: 1.1, move: ["Spider_Walk", "Walk"], death: ["Spider_Death", "Death"], yaw: Math.PI },
+  enemy_thief_01: { slot: "enemy_skeleton", height: 1.8, move: ["Run", "Walk"], death: DEATH, yaw: Math.PI },
   enemy_boss_01: { slot: "enemy_demon", height: 3.4, move: ["Walk"], death: DEATH, yaw: Math.PI },
   enemy_boss_02: { slot: "enemy_dragon", height: 4.4, move: ["Dragon_Flying", "Flying"], death: ["Dragon_Death", "Death"], yaw: Math.PI },
 };
