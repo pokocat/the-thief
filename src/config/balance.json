@@ -1,5 +1,5 @@
 {
-  "startingGold": 300,
+  "startingGold": 999999,
   "totalWaves": 30,
   "leakLimit": 20,
   "waveBonusBase": 50,

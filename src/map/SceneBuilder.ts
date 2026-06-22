@@ -44,13 +44,13 @@ export class SceneBuilder {
 
     const top = MeshBuilder.CreateBox("islandTop", { width: w, height: 1, depth: d }, this.scene);
     top.position.set(cx, -0.5, cz);
-    top.material = bumpyMat(this.scene, "#5fa03e", 14, 0.5);
+    top.material = bumpyMat(this.scene, "#4e7d33", 14, 0.55);
     top.receiveShadows = true;
     top.isPickable = false;
 
     const rim = MeshBuilder.CreateBox("rim", { width: w + 1.4, height: 0.5, depth: d + 1.4 }, this.scene);
     rim.position.set(cx, -0.95, cz);
-    rim.material = flatMat(this.scene, "#74b84e", 0.14);
+    rim.material = flatMat(this.scene, "#5e9440", 0.14);
     rim.isPickable = false;
 
     // water moat ring (translucent, glowing edge)
@@ -78,7 +78,7 @@ export class SceneBuilder {
       const tile = MeshBuilder.CreateBox("path", { width: this.map.pathWidth, height: 0.16, depth: step + 0.12 }, this.scene);
       tile.position.copyFrom(out);
       tile.rotation.y = heading;
-      tile.material = bumpyMat(this.scene, i % 2 === 0 ? "#c2a878" : "#b09668", 1, 0.5);
+      tile.material = bumpyMat(this.scene, i % 2 === 0 ? "#9b7b4e" : "#8a6c42", 1, 0.55);
       tile.receiveShadows = true;
       tile.isPickable = false;
       i++;

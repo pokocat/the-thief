@@ -22,27 +22,27 @@ const DEATH = ["Death"];
 
 // enemy config id -> CC0 Warcraft-flavored monster + clip mapping
 const ENEMY: Record<string, EnemyReg> = {
-  enemy_normal_01: { slot: "enemy_goblin", height: 1.8, move: ["Walk"], death: DEATH, yaw: Math.PI },
-  enemy_fast_01: { slot: "enemy_werewolf", height: 1.6, move: ["Gallop", "Run", "Walk"], death: DEATH, yaw: Math.PI },
-  enemy_armor_01: { slot: "enemy_orc", height: 1.9, move: ["Walk"], death: DEATH, yaw: Math.PI },
-  enemy_tank_01: { slot: "enemy_ogre", height: 2.7, move: ["Walk"], death: DEATH, yaw: Math.PI },
-  enemy_flying_01: { slot: "enemy_bat", height: 1.7, move: ["Flying", "Fast_Flying"], death: DEATH, yaw: Math.PI },
-  enemy_magic_01: { slot: "enemy_necromancer", height: 2.0, move: ["Walk"], death: DEATH, yaw: Math.PI },
-  enemy_lowvalue_01: { slot: "enemy_spider", height: 1.1, move: ["Spider_Walk", "Walk"], death: ["Spider_Death", "Death"], yaw: Math.PI },
-  enemy_thief_01: { slot: "enemy_skeleton", height: 1.8, move: ["Run", "Walk"], death: DEATH, yaw: Math.PI },
-  enemy_boss_01: { slot: "enemy_demon", height: 3.4, move: ["Walk"], death: DEATH, yaw: Math.PI },
-  enemy_boss_02: { slot: "enemy_dragon", height: 4.4, move: ["Dragon_Flying", "Flying"], death: ["Dragon_Death", "Death"], yaw: Math.PI },
+  enemy_normal_01: { slot: "enemy_goblin", height: 1.8, move: ["Walk"], death: DEATH, yaw: 0 },
+  enemy_fast_01: { slot: "enemy_werewolf", height: 1.6, move: ["Gallop", "Run", "Walk"], death: DEATH, yaw: 0 },
+  enemy_armor_01: { slot: "enemy_orc", height: 1.9, move: ["Walk"], death: DEATH, yaw: 0 },
+  enemy_tank_01: { slot: "enemy_ogre", height: 2.7, move: ["Walk"], death: DEATH, yaw: 0 },
+  enemy_flying_01: { slot: "enemy_bat", height: 1.7, move: ["Flying", "Fast_Flying"], death: DEATH, yaw: 0 },
+  enemy_magic_01: { slot: "enemy_necromancer", height: 2.0, move: ["Walk"], death: DEATH, yaw: 0 },
+  enemy_lowvalue_01: { slot: "enemy_spider", height: 1.1, move: ["Spider_Walk", "Walk"], death: ["Spider_Death", "Death"], yaw: 0 },
+  enemy_thief_01: { slot: "enemy_skeleton", height: 1.8, move: ["Run", "Walk"], death: DEATH, yaw: 0 },
+  enemy_boss_01: { slot: "enemy_demon", height: 3.4, move: ["Walk"], death: DEATH, yaw: 0 },
+  enemy_boss_02: { slot: "enemy_dragon", height: 4.4, move: ["Dragon_Flying", "Flying"], death: ["Dragon_Death", "Death"], yaw: 0 },
 };
 
 // tower model key -> CC0 model + clip mapping
 const TOWER: Record<string, TowerReg> = {
-  thief: { slot: "tower_rogue", height: 1.9, idle: ["Idle"], attack: ["Punch", "Sword_Slash"], death: DEATH, yaw: Math.PI },
-  hero: { slot: "tower_knight", height: 2.2, idle: ["Idle_Sword", "Idle"], attack: ["Sword_Slash", "Punch"], death: DEATH, yaw: Math.PI },
-  mage_blood: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: Math.PI },
-  mage_armor: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: Math.PI },
-  mage_slow: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: Math.PI },
-  frost: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: Math.PI },
-  archer: { slot: "tower_archer", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: Math.PI },
+  thief: { slot: "tower_rogue", height: 1.9, idle: ["Idle"], attack: ["Punch", "Sword_Slash"], death: DEATH, yaw: 0 },
+  hero: { slot: "tower_knight", height: 2.2, idle: ["Idle_Sword", "Idle"], attack: ["Sword_Slash", "Punch"], death: DEATH, yaw: 0 },
+  mage_blood: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
+  mage_armor: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
+  mage_slow: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
+  frost: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
+  archer: { slot: "tower_archer", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
 };
 
 function statusMeshes(scene: Scene, root: TransformNode, height: number): { slowRing: Mesh; freezeBox: Mesh } {

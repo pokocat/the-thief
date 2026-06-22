@@ -27,16 +27,16 @@ export function setupVisuals(scene: Scene, camera: Camera): ShadowGenerator {
   scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(`${base}assets/env/environment.env`, scene);
   scene.environmentIntensity = 1.15;
 
-  // --- fog for depth ---
+  // --- fog for depth (light daylight haze, classic grassy-map look) ---
   scene.fogMode = Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.0085;
-  scene.fogColor = new Color3(0.42, 0.34, 0.52);
+  scene.fogDensity = 0.006;
+  scene.fogColor = new Color3(0.66, 0.78, 0.9);
 
   // --- lights ---
   const hemi = new HemisphericLight("hemi", new Vector3(0.1, 1, 0.2), scene);
   hemi.intensity = 0.95;
-  hemi.diffuse = new Color3(1.0, 0.96, 0.85); // warm sky
-  hemi.groundColor = new Color3(0.45, 0.42, 0.55); // cool bounce fill
+  hemi.diffuse = new Color3(1.0, 0.98, 0.9); // bright daylight
+  hemi.groundColor = new Color3(0.4, 0.5, 0.35); // green grass bounce
 
   const key = new DirectionalLight("key", new Vector3(-0.55, -1, -0.45), scene);
   key.position = new Vector3(40, 70, 35);
@@ -62,9 +62,9 @@ export function setupVisuals(scene: Scene, camera: Camera): ShadowGenerator {
   sky.infiniteDistance = true;
   sky.isPickable = false;
   const skyMat = new GradientMaterial("skyMat", scene);
-  skyMat.topColor = Color3.FromHexString("#3a2f6e");
-  skyMat.bottomColor = Color3.FromHexString("#c79bd6");
-  skyMat.offset = 0.35;
+  skyMat.topColor = Color3.FromHexString("#4f86d8");
+  skyMat.bottomColor = Color3.FromHexString("#cfeaff");
+  skyMat.offset = 0.4;
   skyMat.smoothness = 1.2;
   skyMat.disableLighting = true;
   skyMat.backFaceCulling = false;
