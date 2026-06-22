@@ -174,5 +174,53 @@
     "license": "CC0",
     "source": "https://poly.pizza/m/Gq38E7hFZw",
     "kb": 22
+  },
+  {
+    "slot": "prop_platform",
+    "term": "platform",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/aEsU846H8u",
+    "kb": 27
+  },
+  {
+    "slot": "prop_portal",
+    "term": "stone arch",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/QwWdOcNIMh",
+    "kb": 234
+  },
+  {
+    "slot": "prop_grass",
+    "term": "grass",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/UGTOzcO3P2",
+    "kb": 749
+  },
+  {
+    "slot": "prop_banner",
+    "term": "banner",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/dQjx8fBjIl",
+    "kb": 26
+  },
+  {
+    "slot": "prop_well",
+    "term": "well",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/QlqncKYxXb",
+    "kb": 107
+  },
+  {
+    "slot": "prop_lantern",
+    "term": "lamp post",
+    "creator": "Quaternius",
+    "license": "CC0",
+    "source": "https://poly.pizza/m/nFwrlcLvM5",
+    "kb": 10
   }
 ]

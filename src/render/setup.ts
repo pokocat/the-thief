@@ -10,6 +10,7 @@ import {
   DefaultRenderingPipeline,
   MeshBuilder,
   ImageProcessingConfiguration,
+  CubeTexture,
 } from "../bjs";
 import { GradientMaterial } from "@babylonjs/materials";
 import { setShadowGenerator } from "./shadows";
@@ -20,6 +21,11 @@ import { setShadowGenerator } from "./shadows";
 export function setupVisuals(scene: Scene, camera: Camera): ShadowGenerator {
   scene.clearColor = new Color4(0.16, 0.13, 0.26, 1);
   scene.ambientColor = new Color3(0.5, 0.5, 0.6);
+
+  // image-based lighting so glb PBR materials render with authored colors
+  const base = (import.meta as unknown as { env: { BASE_URL: string } }).env.BASE_URL;
+  scene.environmentTexture = CubeTexture.CreateFromPrefilteredData(`${base}assets/env/environment.env`, scene);
+  scene.environmentIntensity = 1.15;
 
   // --- fog for depth ---
   scene.fogMode = Scene.FOGMODE_EXP2;

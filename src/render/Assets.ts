@@ -1,35 +1,5 @@
 import "@babylonjs/loaders/glTF";
-import { Scene, SceneLoader, AssetContainer, TransformNode, AnimationGroup, Vector3, Color3, StandardMaterial } from "../bjs";
-
-// Convert glb PBR materials to StandardMaterial so they light correctly under
-// our directional+hemi lights and cast/receive shadows WITHOUT needing an HDR
-// environment (PBR metallic surfaces render near-black without IBL). Albedo
-// textures/colors are preserved. Done once per container (shared by instances).
-function convertMaterials(c: AssetContainer, scene: Scene): void {
-  const map = new Map<unknown, StandardMaterial>();
-  for (const mesh of c.meshes) {
-    const m = mesh.material as unknown as {
-      getClassName?: () => string; name?: string;
-      albedoTexture?: unknown; albedoColor?: { r: number; g: number; b: number }; backFaceCulling?: boolean;
-    } | null;
-    if (!m || !(m.getClassName?.() ?? "").includes("PBR")) continue;
-    let s = map.get(m);
-    if (!s) {
-      s = new StandardMaterial((m.name ?? "mat") + "_std", scene);
-      const col = m.albedoColor ?? { r: 0.8, g: 0.8, b: 0.8 };
-      s.diffuseColor = new Color3(col.r, col.g, col.b);
-      if (m.albedoTexture) s.diffuseTexture = m.albedoTexture as never;
-      // self-fill proportional to albedo so models stay readable from any angle
-      s.emissiveColor = new Color3(col.r * 0.38, col.g * 0.38, col.b * 0.38);
-      s.specularColor = new Color3(0.08, 0.08, 0.09);
-      s.specularPower = 48;
-      if (m.backFaceCulling !== undefined) s.backFaceCulling = m.backFaceCulling;
-      map.set(m, s);
-      c.materials.push(s);
-    }
-    mesh.material = s as never;
-  }
-}
+import { Scene, SceneLoader, AssetContainer, TransformNode, AnimationGroup, Vector3 } from "../bjs";
 
 // All CC0 Quaternius models (see ASSETS.md). Served from public/assets/models.
 export const MODEL_SLOTS = {
@@ -55,6 +25,12 @@ export const MODEL_SLOTS = {
   prop_mushroom: "prop_mushroom.glb",
   prop_fence: "prop_fence.glb",
   prop_torch: "prop_torch.glb",
+  prop_platform: "prop_platform.glb",
+  prop_portal: "prop_portal.glb",
+  prop_grass: "prop_grass.glb",
+  prop_banner: "prop_banner.glb",
+  prop_well: "prop_well.glb",
+  prop_lantern: "prop_lantern.glb",
 } as const;
 export type Slot = keyof typeof MODEL_SLOTS;
 
@@ -74,7 +50,6 @@ export async function preloadModels(scene: Scene, onProgress?: (done: number, to
       const c = await SceneLoader.LoadAssetContainerAsync(root, MODEL_SLOTS[slot], scene);
       c.meshes.forEach((m) => (m.isPickable = false));
       c.animationGroups.forEach((g) => g.stop());
-      convertMaterials(c, scene);
       containers.set(slot, c);
       onProgress?.(++done, slots.length);
     })

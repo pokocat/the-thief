@@ -76,21 +76,28 @@ export function buildTowerGlb(scene: Scene, cfg: TowerConfig): TowerVisual {
   const reg = TOWER[cfg.model] ?? TOWER.thief;
   if (!hasModel(reg.slot)) return buildTowerModel(scene, cfg); // procedural fallback
   const root = new TransformNode(`tower_${cfg.id}`, scene);
-  // glowing stone pedestal
-  cyl(scene, root, toonMat(scene, "#544a63"), 1.5, 1.95, 0.45, 0.22);
-  cyl(scene, root, toonMat(scene, "#6a6080"), 1.55, 1.55, 0.12, 0.46);
-  cyl(scene, root, glowMat(scene, cfg.color, 0.9), 1.3, 1.3, 0.06, 0.54);
-  applyToonStyle(root, 0.05);
+  // glb stone platform base (fallback to a simple disc) + colored glow ring
+  let baseTop = 0.5;
+  if (hasModel("prop_platform")) {
+    const pinst = instantiate("prop_platform", 0.5, root);
+    applyToonStyle(root, 0.03);
+    baseTop = pinst.height;
+  } else {
+    cyl(scene, root, toonMat(scene, "#544a63"), 1.5, 1.95, 0.45, 0.22);
+    applyToonStyle(root, 0.05);
+  }
+  const ring = cyl(scene, root, glowMat(scene, cfg.color, 0.9), 1.3, 1.3, 0.06, baseTop + 0.02);
+  ring.renderOutline = false;
 
   const head = new TransformNode(`towerHead_${cfg.id}`, scene);
-  head.parent = root; head.position.y = 0.56;
+  head.parent = root; head.position.y = baseTop;
   const height = reg.height + (cfg.tier - 1) * 0.12;
   const inst = instantiate(reg.slot, height, head);
   inst.modelRoot.rotation.y = reg.yaw;
   shadowsOnly(inst.modelRoot);
   const anim = new AnimController(inst.anims);
   anim.play(reg.idle, true);
-  return { root, head, muzzleHeight: height * 0.7 + 0.56, anim };
+  return { root, head, muzzleHeight: height * 0.7 + baseTop, anim };
 }
 
 export function towerAttackClips(model: string): string[] {

@@ -1,0 +1,11 @@
+import { chromium } from "playwright";
+const b=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader","--ignore-gpu-blocklist","--enable-webgl","--no-sandbox"]});
+const p=await b.newPage({viewport:{width:1100,height:620},deviceScaleFactor:1.3});
+await p.goto("http://localhost:4173/",{waitUntil:"domcontentloaded"});
+await p.waitForFunction(()=>!!window.heistTD,null,{timeout:90000});
+await p.waitForTimeout(3500);
+await p.evaluate(()=>{ const c=window.heistTD.camera.camera; c.alpha += 1.1; c.beta = 0.6; });
+await p.waitForTimeout(800);
+await p.screenshot({path:"shots/rotated.png",timeout:120000});
+console.log("rotated saved");
+await b.close();

@@ -105,40 +105,34 @@ export class SceneBuilder {
     const sp = this.map.spawn;
     const root = new TransformNode("spawnPortal", this.scene);
     root.position.set(sp.x, 0, sp.z);
-    // stone arch
-    for (const sx of [-1, 1]) cyl(this.scene, root, toonMat(this.scene, "#6b6076"), 0.5, 0.6, 3.0, [sx * 1.4, 1.5, 0]);
-    const top = MeshBuilder.CreateTorus("portalArch", { diameter: 3, thickness: 0.5, tessellation: 18 }, this.scene);
-    top.parent = root; top.position.y = 1.6; top.rotation.x = Math.PI / 2.1;
-    top.material = toonMat(this.scene, "#6b6076");
-    const swirl = MeshBuilder.CreateDisc("portalInner", { radius: 1.3, tessellation: 24 }, this.scene);
-    swirl.parent = root; swirl.position.set(0, 1.5, -0.1); swirl.rotation.x = Math.PI / 2.1;
+    instantiate("prop_portal", 3.2, root);
+    applyToonStyle(root, 0.04);
+    // glowing magical swirl in the gateway
+    const swirl = MeshBuilder.CreateDisc("portalInner", { radius: 1.1, tessellation: 24 }, this.scene);
+    swirl.parent = root; swirl.position.set(0, 1.6, 0); swirl.rotation.x = Math.PI / 2.1;
     swirl.material = glowMat(this.scene, "#b06cff", 1.4);
     swirl.isPickable = false;
     this.scene.registerBeforeRender(() => (swirl.rotation.y += 0.03));
-    applyToonStyle(root, 0.05);
   }
 
   private buildGoalCrystal(): void {
     const g = this.map.goal;
     const root = new TransformNode("goalCrystal", this.scene);
     root.position.set(g.x, 0, g.z);
-    const base = MeshBuilder.CreateCylinder("goalBase", { diameterTop: 2.0, diameterBottom: 2.8, height: 0.7, tessellation: 8 }, this.scene);
-    base.parent = root; base.position.y = 0.35; base.material = toonMat(this.scene, "#445074");
-    const crystal = MeshBuilder.CreateCylinder("goalCrystalMesh", { diameterTop: 0, diameterBottom: 1.3, height: 3.0, tessellation: 6 }, this.scene);
-    crystal.parent = root; crystal.position.y = 2.2; crystal.material = glowMat(this.scene, "#46e8d6", 1.4);
-    crystal.convertToFlatShadedMesh();
-    // orbiting shards
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2;
-      const sh = MeshBuilder.CreateCylinder("shard", { diameterTop: 0, diameterBottom: 0.4, height: 1.0, tessellation: 5 }, this.scene);
-      sh.parent = root; sh.position.set(Math.cos(a) * 1.6, 1.4, Math.sin(a) * 1.6); sh.material = glowMat(this.scene, "#7ff0e2", 1.2); sh.convertToFlatShadedMesh();
-    }
+    // stone platform base + glowing crystal core
+    const base = new TransformNode("goalBase", this.scene);
+    base.parent = root;
+    instantiate("prop_platform", 0.8, base);
+    applyToonStyle(base, 0.04);
+    const core = new TransformNode("goalCore", this.scene);
+    core.parent = root; core.position.y = 0.6;
+    const inst = instantiate("prop_crystal", 2.6, core);
+    for (const m of inst.modelRoot.getChildMeshes(false)) m.material = glowMat(this.scene, "#46e8d6", 1.3);
     this.scene.registerBeforeRender(() => {
       const t = performance.now() * 0.001;
-      crystal.rotation.y = t * 0.6;
-      crystal.position.y = 2.2 + Math.sin(t * 2) * 0.12;
+      core.rotation.y = t * 0.6;
+      core.position.y = 0.6 + Math.sin(t * 2) * 0.12;
     });
-    applyToonStyle(root, 0.05);
   }
 
   private scatterDecorations(): void {
@@ -167,13 +161,16 @@ export class SceneBuilder {
 
   private placeDecoration(x: number, z: number): void {
     const r = rand();
-    if (r < 0.26) this.prop("prop_tree", x, z, randRange(2.8, 4.2));
-    else if (r < 0.40) this.prop("prop_pine", x, z, randRange(2.4, 3.4));
-    else if (r < 0.55) this.prop("prop_rock", x, z, randRange(0.5, 1.2));
-    else if (r < 0.66) this.grass(x, z);
-    else if (r < 0.76) this.prop("prop_mushroom", x, z, randRange(0.4, 0.8));
-    else if (r < 0.85) this.prop("prop_crystal", x, z, randRange(0.9, 1.6));
-    else if (r < 0.92) this.prop("prop_fence", x, z, 1.0);
+    if (r < 0.22) this.prop("prop_tree", x, z, randRange(2.8, 4.2));
+    else if (r < 0.34) this.prop("prop_pine", x, z, randRange(2.4, 3.4));
+    else if (r < 0.46) this.prop("prop_rock", x, z, randRange(0.5, 1.2));
+    else if (r < 0.58) this.prop("prop_grass", x, z, randRange(0.4, 0.9));
+    else if (r < 0.66) this.prop("prop_mushroom", x, z, randRange(0.4, 0.8));
+    else if (r < 0.74) this.prop("prop_crystal", x, z, randRange(0.9, 1.6));
+    else if (r < 0.80) this.prop("prop_fence", x, z, 1.0);
+    else if (r < 0.86) this.prop("prop_well", x, z, 1.6);
+    else if (r < 0.92) this.prop("prop_lantern", x, z, 1.7);
+    else if (r < 0.96) this.prop("prop_banner", x, z, 1.8);
     else this.torch(x, z);
   }
 
@@ -184,17 +181,6 @@ export class SceneBuilder {
     instantiate(slot, height, t);
     t.rotation.y = randRange(0, 6.28);
     applyToonStyle(t, 0.02);
-  }
-
-  private grass(x: number, z: number): void {
-    const t = new TransformNode("grass", this.scene);
-    t.position.set(x, 0, z);
-    for (let i = 0; i < 4; i++) {
-      const blade = MeshBuilder.CreateCylinder("g", { diameterTop: 0, diameterBottom: 0.14, height: randRange(0.5, 0.9), tessellation: 4 }, this.scene);
-      blade.parent = t; blade.position.set(randRange(-0.3, 0.3), 0.3, randRange(-0.3, 0.3)); blade.rotation.z = randRange(-0.2, 0.2);
-      blade.material = toonMat(this.scene, "#6fc24a");
-    }
-    applyToonStyle(t, 0.03);
   }
 
   private torch(x: number, z: number): void {
@@ -247,11 +233,4 @@ export class SceneBuilder {
     ps.updateSpeed = 0.015;
     ps.start();
   }
-}
-
-// local cylinder helper (SceneBuilder-scoped, mirrors ModelFactory's)
-function cyl(s: Scene, p: TransformNode, m: import("../bjs").Material, dTop: number, dBot: number, h: number, pos: [number, number, number]): Mesh {
-  const x = MeshBuilder.CreateCylinder("c", { diameterTop: dTop, diameterBottom: dBot, height: h, tessellation: 12 }, s);
-  x.material = m; x.parent = p; x.position.set(pos[0], pos[1], pos[2]);
-  return x;
 }
