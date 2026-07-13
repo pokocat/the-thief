@@ -96,7 +96,12 @@ export class WorldOverlay {
       const fill = e.barEl.firstChild as HTMLElement;
       const ratio = Math.max(0, e.hp / e.maxHp);
       fill.style.width = `${ratio * 100}%`;
-      fill.style.background = ratio > 0.5 ? "#5fd35f" : ratio > 0.25 ? "#e8c23a" : "#e8553a";
+      fill.style.background =
+        ratio > 0.5
+          ? "linear-gradient(180deg,#7fe37f,#3fb83f)"
+          : ratio > 0.25
+            ? "linear-gradient(180deg,#f0d04a,#d9a92a)"
+            : "linear-gradient(180deg,#f0705a,#c23a2a)";
     }
     // floating text
     for (let i = this.texts.length - 1; i >= 0; i--) {
@@ -108,7 +113,8 @@ export class WorldOverlay {
         continue;
       }
       const k = t.age / t.life;
-      const rise = new Vector3(t.world.x, t.world.y + k * 2.2, t.world.z);
+      const ease = 1 - (1 - k) * (1 - k); // ease-out rise
+      const rise = new Vector3(t.world.x, t.world.y + ease * 2.2, t.world.z);
       this.project(rise, tmp);
       if (tmp.behind) {
         t.el.style.display = "none";
