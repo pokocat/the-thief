@@ -1,7 +1,8 @@
 import { Vector3, MeshBuilder, Mesh, Scene } from "../bjs";
 import { translucentMat } from "./models/materials";
-import type { TowerVisual } from "./models/ModelFactory";
 import { buildTowerGlb, towerAttackClips, towerIdleClips } from "../render/GlbBuild";
+import type { TowerVisualExt } from "../render/GlbBuild";
+import { ProceduralAnim, approachAngle } from "../render/ProceduralAnim";
 import type { TowerConfig, ItemConfig, TargetMode } from "../config/types";
 import type { GameContext } from "../core/Context";
 import { selectTargets } from "../systems/TargetingSystem";
@@ -14,7 +15,7 @@ export class Tower {
   uid = nextTowerUid++;
   cfg: TowerConfig;
   readonly position: Vector3;
-  visual: TowerVisual;
+  visual: TowerVisualExt;
   padIndex: number;
 
   cooldown = 0;
@@ -22,6 +23,8 @@ export class Tower {
   auraSpeedBonus = 0; // refreshed each frame by TowerManager
   attackPulse = 0;
   private headBaseY = 0.56;
+  private headYaw = 0; // smoothed facing
+  private headTargetYaw = 0;
   items: ItemConfig[] = [];
   investedGold = 0;
   private targetModeOverride: TargetMode | null = null;
@@ -37,6 +40,7 @@ export class Tower {
     this.visual = buildTowerGlb(scene, cfg);
     this.visual.root.position.copyFrom(position);
     this.headBaseY = this.visual.head.position.y;
+    this.ensureProc();
 
     // invisible pick collider
     this.collider = MeshBuilder.CreateBox(`towerHit_${this.uid}`, { width: 1.8, height: 3, depth: 1.8 }, scene);
@@ -95,10 +99,21 @@ export class Tower {
     return new Vector3(this.position.x, this.position.y + this.visual.muzzleHeight, this.position.z);
   }
 
+  // towers without skeletal animation (wizard/archer GLB + every primitive
+  // fallback) get a procedural animator for idle bob + cast recoil
+  private ensureProc(): void {
+    if (!this.visual.anim && !this.visual.proc) {
+      this.visual.proc = new ProceduralAnim(this.visual.head, this.headBaseY, this.uid);
+    }
+  }
+
   update(dt: number, ctx: GameContext): void {
-    // idle bob + attack pulse
+    // per-frame: ease facing, tick procedural + skeletal animation (crossfade)
+    this.headYaw = approachAngle(this.headYaw, this.headTargetYaw, dt * 10);
+    this.visual.head.rotation.y = this.headYaw;
+    this.visual.proc?.update(dt, ctx.time);
+    this.visual.anim?.update(dt);
     this.attackPulse = Math.max(0, this.attackPulse - dt * 4);
-    this.visual.head.position.y = this.headBaseY + Math.sin(ctx.time * 2 + this.uid) * 0.03;
 
     this.cooldown -= dt;
     if (this.cooldown > 0) return;
@@ -111,22 +126,32 @@ export class Tower {
     this.cooldown = this.effectiveAttackInterval(ctx);
     this.attackPulse = 1;
     this.hitCount += 1;
-    const atk = towerAttackClips(this.cfg.model);
-    if (atk.length) this.visual.anim?.playOneShot(atk, towerIdleClips(this.cfg.model));
 
-    // face primary target
+    // face primary target (eased each frame toward this)
     const primary = targets[0];
-    this.visual.head.rotation.y = Math.atan2(primary.pos.x - this.position.x, primary.pos.z - this.position.z);
+    this.headTargetYaw = Math.atan2(primary.pos.x - this.position.x, primary.pos.z - this.position.z);
 
     const muzzle = this.muzzleWorld();
+    // attack animation: skeletal one-shot, else procedural recoil + muzzle flash
+    const atk = towerAttackClips(this.cfg.model);
+    if (atk.length && this.visual.anim) {
+      this.visual.anim.playOneShot(atk, towerIdleClips(this.cfg.model));
+    } else if (this.visual.proc) {
+      this.visual.proc.attack();
+      ctx.effects.burst(muzzle, this.cfg.color, 0.55);
+    }
+
     const doSteal = (this.cfg.stealEveryHits ?? 0) > 0 && this.hitCount % (this.cfg.stealEveryHits as number) === 0;
 
     targets.forEach((target, idx) => {
       const arc = target.isFlying ? 1.2 : 0.4;
-      ctx.effects.fireProjectile(muzzle, target.topAnchor, this.cfg.color, arc);
+      ctx.effects.fireProjectile(muzzle, target.topAnchor, this.cfg.color, arc, this.cfg.category);
       const dmg = this.effectiveDamage(ctx, target.isFlying);
       applyDamage(target, dmg, this.cfg.damageType, ctx);
-      if (target.alive) this.applyOnHit(target, ctx);
+      if (target.alive) {
+        this.applyOnHit(target, ctx);
+        ctx.enemies.onHit(target); // white-flash + squash feedback
+      }
       // steal from the primary target only
       if (idx === 0 && doSteal && target.alive) trySteal(this, target, ctx);
     });
@@ -168,6 +193,7 @@ export class Tower {
     this.visual = buildTowerGlb(this.scene, newCfg);
     this.visual.root.position.copyFrom(this.position);
     this.headBaseY = this.visual.head.position.y;
+    this.ensureProc();
     this.rangeRing.dispose();
     this.rangeRing = MeshBuilder.CreateTorus(`range_${this.uid}`, { diameter: newCfg.range * 2, thickness: 0.12, tessellation: 36 }, this.scene);
     this.rangeRing.material = translucentMat(this.scene, "#ffe27a", 0.5, 0.8);

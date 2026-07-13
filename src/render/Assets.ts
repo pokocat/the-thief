@@ -65,10 +65,14 @@ export interface ModelInstance {
 
 // Instantiate a slot (clones meshes + skeleton + animation groups), scaled so
 // its height == targetHeight and its feet sit at y=0.
-export function instantiate(slot: Slot, targetHeight: number, parent: TransformNode): ModelInstance {
+// cloneMeshes: when true, produce real Mesh clones instead of hardware
+// InstancedMeshes. Instances share the source material (setting .material on an
+// InstancedMesh is a silent no-op), so any model that needs a per-instance
+// material (e.g. the recolored wizard variants) must be cloned, not instanced.
+export function instantiate(slot: Slot, targetHeight: number, parent: TransformNode, cloneMeshes = false): ModelInstance {
   const c = containers.get(slot);
   if (!c) throw new Error(`asset not preloaded: ${slot}`);
-  const entries = c.instantiateModelsToScene((n) => n, false, { doNotInstantiate: false });
+  const entries = c.instantiateModelsToScene((n) => n, false, { doNotInstantiate: cloneMeshes });
   const modelRoot = new TransformNode(`model_${slot}`, parent.getScene());
   modelRoot.parent = parent;
   for (const n of entries.rootNodes) n.parent = modelRoot;
@@ -98,43 +102,106 @@ export function instantiate(slot: Slot, targetHeight: number, parent: TransformN
   return { modelRoot, anims: entries.animationGroups, height: targetHeight };
 }
 
-// Simple animation state controller: plays one looping/oneshot clip at a time,
-// matched by name substring; supports speed (for slow/freeze).
+// Animation state controller: plays one looping/oneshot clip at a time, matched
+// tolerantly by name (handles truncated Quaternius clip names like
+// "...|Death|CharacterArmature|Dea"), crossfades between clips over ~0.15s using
+// animation-group weights, and supports speed scaling (for slow/freeze).
+// crossfade is ticked from the existing per-frame update loops (no
+// registerBeforeRender) via update(dt).
 export class AnimController {
   private current: AnimationGroup | null = null;
+  private fromG: AnimationGroup | null = null;
+  private fadeT = 0;
+  private fadeDur = 0;
+  private static readonly FADE = 0.15;
   constructor(private groups: AnimationGroup[]) {}
+
+  // Tolerant, bidirectional match: a clip matches if its (lowercased) name
+  // contains the query, or any "|"-delimited segment startsWith/is-a-prefix-of
+  // the query. So "death" matches a segment "dea" (truncated) and vice-versa.
+  private matches(name: string, sub: string): boolean {
+    const n = name.toLowerCase();
+    const s = sub.toLowerCase();
+    if (n.includes(s)) return true;
+    for (const seg of n.split("|")) {
+      if (!seg) continue;
+      if (seg.startsWith(s) || s.startsWith(seg)) return true;
+    }
+    return false;
+  }
 
   private find(...subs: string[]): AnimationGroup | null {
     for (const sub of subs) {
-      const g = this.groups.find((x) => x.name.toLowerCase().includes(sub.toLowerCase()));
+      const g = this.groups.find((x) => this.matches(x.name, sub));
       if (g) return g;
     }
     return null;
   }
 
-  play(subs: string[], loop = true, speed = 1): void {
-    const g = this.find(...subs);
-    if (!g || g === this.current) {
-      if (this.current) this.current.speedRatio = speed;
-      return;
-    }
-    if (this.current) this.current.stop();
+  has(subs: string[]): boolean {
+    return !!this.find(...subs);
+  }
+
+  private beginFade(g: AnimationGroup, loop: boolean, speed: number): void {
+    // clear any in-flight fade source so we never leave a group half-weighted
+    if (this.fromG && this.fromG !== g) this.fromG.stop();
+    this.fromG = null;
+    const blend = !!this.current && this.current.isPlaying && this.current !== g;
+    if (blend) this.fromG = this.current;
+    else if (this.current && this.current !== g) this.current.stop();
     g.speedRatio = speed;
+    g.stop();
     g.play(loop);
+    if (blend) {
+      g.setWeightForAllAnimatables(0);
+      this.fromG!.setWeightForAllAnimatables(1);
+      this.fadeT = 0;
+      this.fadeDur = AnimController.FADE;
+    } else {
+      g.setWeightForAllAnimatables(1);
+      this.fadeDur = 0;
+    }
     this.current = g;
   }
 
-  // play a one-shot clip (e.g. attack) then return to an idle/loop clip
+  // Advance an in-progress crossfade. Cheap no-op when nothing is fading.
+  update(dt: number): void {
+    if (this.fadeDur <= 0) return;
+    this.fadeT += dt;
+    const k = Math.min(1, this.fadeT / this.fadeDur);
+    if (this.current) this.current.setWeightForAllAnimatables(k);
+    if (this.fromG) this.fromG.setWeightForAllAnimatables(1 - k);
+    if (k >= 1) {
+      if (this.fromG) {
+        this.fromG.stop();
+        this.fromG = null;
+      }
+      if (this.current) this.current.setWeightForAllAnimatables(1);
+      this.fadeDur = 0;
+    }
+  }
+
+  // returns true if a matching clip was found and started
+  play(subs: string[], loop = true, speed = 1): boolean {
+    const g = this.find(...subs);
+    if (!g) return false;
+    if (g === this.current) {
+      g.speedRatio = speed;
+      return true;
+    }
+    this.beginFade(g, loop, speed);
+    return true;
+  }
+
+  // play a one-shot clip (e.g. attack) then crossfade back to an idle/loop clip
   playOneShot(subs: string[], thenSubs: string[]): void {
     const g = this.find(...subs);
     if (!g) return;
-    if (this.current) this.current.stop();
-    g.speedRatio = 1;
-    g.play(false);
-    this.current = g;
+    this.beginFade(g, false, 1);
     g.onAnimationGroupEndObservable.addOnce(() => {
-      this.current = null;
-      this.play(thenSubs, true);
+      if (this.current === g) {
+        this.play(thenSubs, true);
+      }
     });
   }
 
@@ -145,6 +212,8 @@ export class AnimController {
   stopAll(): void {
     for (const g of this.groups) g.stop();
     this.current = null;
+    this.fromG = null;
+    this.fadeDur = 0;
   }
 
   dispose(): void {
