@@ -46,8 +46,9 @@ export class SceneBuilder {
 
     const top = MeshBuilder.CreateBox("islandTop", { width: w, height: 1, depth: d }, this.scene);
     top.position.set(cx, -0.5, cz);
-    // deeper, more saturated meadow: dual-tone grass diffuse + relief normal
-    top.material = grassMat(this.scene, "#5a9a3c", 5, 0.45);
+    // natural (desaturated) meadow: dual-tone grass diffuse + gentle relief.
+    // Fewer repeats + low bump so no visible tiling grid across the ground.
+    top.material = grassMat(this.scene, "#4f8a38", 3, 0.28);
     top.receiveShadows = true;
     top.isPickable = false;
     top.freezeWorldMatrix();
@@ -62,7 +63,7 @@ export class SceneBuilder {
     const moat = MeshBuilder.CreateDisc("moat", { radius: Math.max(w, d) * 0.62, tessellation: 48 }, this.scene);
     moat.rotation.x = Math.PI / 2;
     moat.position.set(cx, -1.15, cz);
-    const wmat = waterMat(this.scene, "#2f9fd8", 0.78);
+    const wmat = waterMat(this.scene, "#2e6fa8", 0.82);
     moat.material = wmat;
     moat.isPickable = false;
     moat.freezeWorldMatrix();
@@ -76,7 +77,10 @@ export class SceneBuilder {
     // floating rock underside
     const under = MeshBuilder.CreateCylinder("under", { diameterTop: Math.max(w, d), diameterBottom: 3, height: 9, tessellation: 7 }, this.scene);
     under.position.set(cx, -5.5, cz);
-    under.material = toonMat(this.scene, "#5c4630");
+    // rock underside: flat (not toon) so its big facets don't pick up the toon
+    // fresnel rim (which read as orange/pink slabs behind the island). Muted
+    // earth-grey so the background recedes behind the meadow.
+    under.material = flatMat(this.scene, "#6b5a48", 0.09);
     under.convertToFlatShadedMesh();
     under.isPickable = false;
     under.freezeWorldMatrix();
@@ -97,10 +101,10 @@ export class SceneBuilder {
       (i % 2 === 0 ? even : odd).push(tile);
       i++;
     }
-    // dark stone slabs, two high-contrast tones, merged into two static meshes
-    // so the path reads clearly against the grass and is cheap to draw.
-    this.mergeTiles(even, "#7a5c38");
-    this.mergeTiles(odd, "#493420");
+    // warm stone slabs in two *close* tones (subtle brick↔brick variation, not
+    // a zebra crossing). The path still reads as one band against the grass.
+    this.mergeTiles(even, "#7d6242");
+    this.mergeTiles(odd, "#6f5639");
   }
 
   private mergeTiles(tiles: Mesh[], hex: string): void {
@@ -117,8 +121,8 @@ export class SceneBuilder {
   private buildPads(): void {
     // shared, breathing rune material for all rune rings (one draw state, one
     // pulse loop); base stone is a shared cached toon material.
-    const runeMat = emissivePulseMat(this.scene, "#59d6c8", 0.55);
-    const stoneMat = toonMat(this.scene, "#4a423c"); // dark grey-brown stone ring
+    const runeMat = emissivePulseMat(this.scene, "#5fe6d6", 0.7);
+    const stoneMat = toonMat(this.scene, "#2f3a3d"); // deep slate plate (contrasts grass + bright rune)
     const runes: Mesh[] = [];
 
     this.map.buildPoints.forEach((p, index) => {
@@ -148,10 +152,10 @@ export class SceneBuilder {
       merged.isPickable = false;
       merged.receiveShadows = false;
       merged.freezeWorldMatrix();
-      const baseC = new Color3(0.35, 0.84, 0.78);
+      const baseC = new Color3(0.42, 0.92, 0.85);
       this.scene.registerBeforeRender(() => {
         const t = performance.now() * 0.001;
-        const k = 0.5 + Math.sin(t * 1.6) * 0.22; // gentle breathing 0.28..0.72
+        const k = 0.62 + Math.sin(t * 1.6) * 0.22; // brighter breathing 0.40..0.84
         runeMat.emissiveColor.copyFromFloats(baseC.r * k, baseC.g * k, baseC.b * k);
       });
     }

@@ -183,18 +183,21 @@ function grassNoiseTexture(scene: Scene): RawTexture {
   if (grassTex) return grassTex;
   const size = 128;
   const data = new Uint8Array(size * size * 4);
-  // two-octave value noise -> soft blobby patches
+  // low-frequency value noise -> large soft patches (no tight tiling grid).
+  // Frequencies chosen so the pattern reads as broad meadow variation, not a
+  // repeating stamp when the texture is wrapped a few times across the ground.
   const noise = (x: number, y: number): number => {
     const xi = (x + size) % size, yi = (y + size) % size;
     let v = 0;
-    v += Math.sin(xi * 0.11 + 0.4) * Math.cos(yi * 0.09 + 1.1) * 1.4;
-    v += Math.sin(xi * 0.045 + 2.1) * Math.cos(yi * 0.05 - 0.7) * 2.0;
-    v += Math.sin(xi * 0.31) * Math.cos(yi * 0.27) * 0.35;
-    return v / 3.75; // ~[-1,1]
+    v += Math.sin(xi * 0.049 + 0.4) * Math.cos(yi * 0.041 + 1.1) * 2.2;
+    v += Math.sin(xi * 0.026 + 2.1) * Math.cos(yi * 0.031 - 0.7) * 1.6;
+    v += Math.sin(xi * 0.10 + 0.9) * Math.cos(yi * 0.088) * 0.4;
+    return v / 4.2; // ~[-1,1]
   };
-  const dark = Color3.FromHexString("#4a8a34"); // shaded blade patches
-  const light = Color3.FromHexString("#69a844"); // sunlit patches
-  const warm = Color3.FromHexString("#a89a52"); // dry-grass / flower speckle
+  // Two natural-green shades, low saturation so the meadow reads soft not plastic.
+  const dark = Color3.FromHexString("#4c8137"); // shaded blade patches (gentle)
+  const light = Color3.FromHexString("#5e9541"); // sunlit patches (= ground base)
+  const warm = Color3.FromHexString("#6f8a44"); // faint dry-grass patch (muted)
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const n = noise(x, y);
@@ -202,10 +205,13 @@ function grassNoiseTexture(scene: Scene): RawTexture {
       let r = dark.r + (light.r - dark.r) * t;
       let g = dark.g + (light.g - dark.g) * t;
       let b = dark.b + (light.b - dark.b) * t;
-      // sparse high-frequency speckle for warm dots
-      const spk = Math.sin(x * 1.7 + 0.3) * Math.sin(y * 1.9 - 0.6);
-      if (spk > 0.9 && n > 0.2) {
-        r = warm.r; g = warm.g; b = warm.b;
+      // very sparse, low-frequency dry patch — gentle blend, never a hard dot
+      const spk = Math.sin(x * 0.21 + 0.3) * Math.sin(y * 0.23 - 0.6);
+      if (spk > 0.86 && n > 0.15) {
+        const w = (spk - 0.86) / 0.14 * 0.6;
+        r = r + (warm.r - r) * w;
+        g = g + (warm.g - g) * w;
+        b = b + (warm.b - b) * w;
       }
       const i = (y * size + x) * 4;
       data[i] = (r * 255) | 0;
@@ -230,16 +236,18 @@ export function grassMat(scene: Scene, hex: string, repeat = 6, strength = 0.5):
   const c = Color3.FromHexString(normalizeHex(hex));
   const m = new StandardMaterial(`grass_${key}`, scene);
   m.diffuseColor = c;
-  m.emissiveColor = c.scale(0.10);
-  m.specularColor = new Color3(0.03, 0.04, 0.03);
+  m.emissiveColor = c.scale(0.06); // low self-glow so it isn't a plastic slab
+  m.specularColor = new Color3(0.02, 0.03, 0.02);
   m.specularPower = 128;
   const diff = grassNoiseTexture(scene);
   diff.uScale = repeat;
   diff.vScale = repeat;
   m.diffuseTexture = diff;
+  // relief normal at a non-integer multiple of the diffuse repeat + gentle
+  // strength, so the two never line up into a visible regular grid.
   const nrm = groundNormalRawTexture(scene);
-  nrm.uScale = repeat * 2;
-  nrm.vScale = repeat * 2;
+  nrm.uScale = repeat * 1.37;
+  nrm.vScale = repeat * 1.37;
   m.bumpTexture = nrm;
   m.bumpTexture.level = strength;
   cache.set(key, m);
@@ -299,23 +307,25 @@ export function emissivePulseMat(scene: Scene, hex: string, intensity = 0.7): St
 export function waterMat(scene: Scene, hex: string, alpha = 0.72): StandardMaterial {
   const c = Color3.FromHexString(normalizeHex(hex));
   const m = new StandardMaterial(`water_${hex}_${Math.random().toString(36).slice(2, 7)}`, scene);
-  m.diffuseColor = c.scale(0.5);
-  m.emissiveColor = c.scale(0.22);
-  m.specularColor = new Color3(0.4, 0.45, 0.5);
-  m.specularPower = 64;
+  m.diffuseColor = c.scale(0.45);
+  m.emissiveColor = c.scale(0.07); // calm deep water — background, not a pool
+  m.specularColor = new Color3(0.14, 0.17, 0.2); // faint highlight only
+  m.specularPower = 96;
   m.alpha = alpha;
   m.backFaceCulling = false;
+  // finer, shallower ripples so the surface shimmers subtly instead of showing
+  // large splotchy light patches across the whole moat.
   const ripple = rippleNormalTexture(scene);
-  ripple.uScale = 4;
-  ripple.vScale = 4;
+  ripple.uScale = 7;
+  ripple.vScale = 7;
   m.bumpTexture = ripple;
-  m.bumpTexture.level = 0.55;
-  // brighter, whiter foam-like edge where the surface faces away from the eye
+  m.bumpTexture.level = 0.22;
+  // restrained cool rim (not white foam) so the moat edge reads without glare
   const fr = new FresnelParameters();
-  fr.bias = 0.15;
-  fr.power = 2.5;
-  fr.leftColor = Color3.White();
-  fr.rightColor = c.scale(0.3);
+  fr.bias = 0.25;
+  fr.power = 3.5;
+  fr.leftColor = c.scale(0.5);
+  fr.rightColor = c.scale(0.12);
   m.emissiveFresnelParameters = fr;
   return m;
 }
