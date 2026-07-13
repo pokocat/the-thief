@@ -8,7 +8,7 @@ import {
   TransformNode,
   ParticleSystem,
 } from "../bjs";
-import { flatMat, toonMat, softCircleTexture, bumpyMat, grassMat, emissivePulseMat, waterMat } from "../entities/models/materials";
+import { flatMat, softCircleTexture, bumpyMat, grassMat, emissivePulseMat, waterMat } from "../entities/models/materials";
 import { instantiate, Slot } from "../render/Assets";
 import { addShadowCaster } from "../render/shadows";
 import { PathSystem } from "./PathSystem";
@@ -121,9 +121,10 @@ export class SceneBuilder {
 
   private buildPads(): void {
     // shared, breathing rune material for all rune rings (one draw state, one
-    // pulse loop); base stone is a shared cached toon material.
+    // pulse loop); base stone must be fresnel-free — toonMat's rim tint reads
+    // as a cyan "filled" plate at grazing view angles.
     const runeMat = emissivePulseMat(this.scene, "#5fe6d6", 0.7);
-    const stoneMat = toonMat(this.scene, "#2f3a3d"); // deep slate plate (contrasts grass + bright rune)
+    const stoneMat = flatMat(this.scene, "#2f3a3d", 0.06);
     const runes: Mesh[] = [];
 
     this.map.buildPoints.forEach((p, index) => {
