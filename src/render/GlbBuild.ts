@@ -1,4 +1,4 @@
-import { MeshBuilder, TransformNode, Scene, Mesh } from "../bjs";
+import { MeshBuilder, TransformNode, Scene, Mesh, VertexBuffer } from "../bjs";
 import { instantiate, AnimController, Slot, hasModel } from "./Assets";
 import { addShadowCaster } from "./shadows";
 import { translucentMat } from "../entities/models/materials";
@@ -46,6 +46,42 @@ const TOWER: Record<string, TowerReg> = {
   frost: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
   archer: { slot: "tower_archer", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
 };
+
+// Remove the flat, near-horizontal base-plate faces baked into the bottom of a
+// mesh (the wizard robe ships with a ground quad). Operates on a unique copy of
+// the geometry so the shared asset container is never mutated.
+function stripFlatBase(mesh: Mesh): void {
+  const pos = mesh.getVerticesData(VertexBuffer.PositionKind);
+  const idx = mesh.getIndices();
+  if (!pos || !idx) return;
+  let minY = Infinity, maxY = -Infinity;
+  for (let i = 1; i < pos.length; i += 3) {
+    if (pos[i] < minY) minY = pos[i];
+    if (pos[i] > maxY) maxY = pos[i];
+  }
+  const span = maxY - minY;
+  if (span <= 0) return;
+  const slab = minY + span * 0.06; // only consider the bottom 6%
+  const kept: number[] = [];
+  let removed = 0;
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = idx[t], b = idx[t + 1], c = idx[t + 2];
+    const ay = pos[a * 3 + 1], by = pos[b * 3 + 1], cy = pos[c * 3 + 1];
+    if (ay <= slab && by <= slab && cy <= slab) {
+      const ax = pos[a * 3], az = pos[a * 3 + 2];
+      const e1x = pos[b * 3] - ax, e1y = by - ay, e1z = pos[b * 3 + 2] - az;
+      const e2x = pos[c * 3] - ax, e2y = cy - ay, e2z = pos[c * 3 + 2] - az;
+      const nx = e1y * e2z - e1z * e2y, ny = e1z * e2x - e1x * e2z, nz = e1x * e2y - e1y * e2x;
+      const nlen = Math.hypot(nx, ny, nz) || 1;
+      if (Math.abs(ny) / nlen > 0.7) { removed++; continue; } // near-horizontal base face
+    }
+    kept.push(a, b, c);
+  }
+  if (removed > 0 && kept.length > 0) {
+    mesh.makeGeometryUnique();
+    mesh.setIndices(kept);
+  }
+}
 
 function statusMeshes(scene: Scene, root: TransformNode, height: number): { slowRing: Mesh; freezeBox: Mesh } {
   const slowRing = MeshBuilder.CreateTorus("slowRing", { diameter: height * 0.85, thickness: 0.16, tessellation: 16 }, scene);
@@ -102,11 +138,12 @@ export function buildTowerGlb(scene: Scene, cfg: TowerConfig): TowerVisualExt {
   if (needsTint) {
     // recolor the robe (Atlas_Diffuse) by element color
     tintModel(inst.modelRoot, ["Atlas_Diffuse"], cfg.color, 0.85);
-    // the wizard GLB bakes in a flat "Atlas_Unlit" decal plane that renders as
-    // an ugly light rectangle on the ground now that the tower sits at y=0 —
-    // hide it (real shadows already ground the tower).
-    for (const m of inst.modelRoot.getChildMeshes(false)) {
-      if (m.material && m.material.name.startsWith("Atlas_Unlit")) m.setEnabled(false);
+    // the wizard GLB bakes a flat base-plate quad into the robe mesh; it reads
+    // as an ugly floating board now that the tower sits at y=0. Strip those
+    // horizontal bottom faces (on a unique geometry copy, so the shared
+    // container geometry is untouched and other instances keep their base).
+    for (const m of inst.modelRoot.getChildMeshes(false) as Mesh[]) {
+      if (m.material && m.material.name.startsWith("Atlas_Diffuse")) stripFlatBase(m);
     }
   }
   const skinned = inst.anims.length > 0;

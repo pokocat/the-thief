@@ -101,10 +101,11 @@ export class SceneBuilder {
       (i % 2 === 0 ? even : odd).push(tile);
       i++;
     }
-    // warm stone slabs in two *close* tones (subtle brick↔brick variation, not
-    // a zebra crossing). The path still reads as one band against the grass.
-    this.mergeTiles(even, "#7d6242");
-    this.mergeTiles(odd, "#6f5639");
+    // warm stone slabs in two *nearly identical* tones — only a whisper of
+    // brick↔brick variation (lightness gap halved again). Overhead it reads as
+    // one uniform sand-stone band, not a diagonal light/dark checker.
+    this.mergeTiles(even, "#7a5f40");
+    this.mergeTiles(odd, "#73593b");
   }
 
   private mergeTiles(tiles: Mesh[], hex: string): void {
@@ -155,7 +156,7 @@ export class SceneBuilder {
       const baseC = new Color3(0.42, 0.92, 0.85);
       this.scene.registerBeforeRender(() => {
         const t = performance.now() * 0.001;
-        const k = 0.62 + Math.sin(t * 1.6) * 0.22; // brighter breathing 0.40..0.84
+        const k = 0.55 + Math.sin(t * 1.6) * 0.10; // gentle breathing 0.45..0.65 (ring glows, inner plate never washes bright)
         runeMat.emissiveColor.copyFromFloats(baseC.r * k, baseC.g * k, baseC.b * k);
       });
     }

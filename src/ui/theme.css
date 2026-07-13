@@ -164,6 +164,31 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0d0a16; }
   to { transform: translate(-50%, 0); opacity: 1; }
 }
 
+/* ---- narrow-screen HUD: compact capsules/buttons so each group stays tight,
+   and drop the toast below the HUD so it never covers the wave/tech buttons.
+   Desktop layout (>600px) is untouched. -------------------------------------- */
+@media (max-width: 600px) {
+  .hud-top { gap: var(--sp-2); padding: var(--sp-2); }
+  .hud-group { gap: var(--sp-1); }
+  .capsule {
+    font-size: var(--fs-sm); font-weight: 700;
+    min-height: 30px; gap: var(--sp-1);
+    padding: 3px var(--sp-2); border-radius: var(--r-sm);
+  }
+  .capsule .ico { font-size: 15px; }
+  .capsule-val { min-width: 0; }
+  .hud-top .btn {
+    min-height: 34px; min-width: 0; gap: 4px;
+    padding: 4px var(--sp-2); font-size: var(--fs-sm); border-radius: var(--r-sm);
+  }
+  .hud-top .btn .ico { font-size: 1em; }
+  .btn-next { padding: 2px var(--sp-2); }
+  .toast {
+    top: calc(env(safe-area-inset-top) + 96px); margin-top: 0;
+    font-size: var(--fs-sm); padding: var(--sp-1) var(--sp-3);
+  }
+}
+
 /* ============================================================================
    Panels — bottom-sheet on mobile, centered card on desktop
    ========================================================================== */
