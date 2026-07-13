@@ -1,14 +1,16 @@
 import {
   MeshBuilder,
   Vector3,
+  Color3,
   Color4,
   Scene,
   Mesh,
   TransformNode,
   ParticleSystem,
 } from "../bjs";
-import { flatMat, toonMat, glowMat, translucentMat, applyToonStyle, softCircleTexture, bumpyMat } from "../entities/models/materials";
+import { flatMat, softCircleTexture, bumpyMat, grassMat, emissivePulseMat, waterMat } from "../entities/models/materials";
 import { instantiate, Slot } from "../render/Assets";
+import { addShadowCaster } from "../render/shadows";
 import { PathSystem } from "./PathSystem";
 import type { MapData } from "../config/types";
 import { randRange, rand } from "../util/math";
@@ -44,75 +46,150 @@ export class SceneBuilder {
 
     const top = MeshBuilder.CreateBox("islandTop", { width: w, height: 1, depth: d }, this.scene);
     top.position.set(cx, -0.5, cz);
-    top.material = bumpyMat(this.scene, "#4e7d33", 14, 0.55);
+    // natural (desaturated) meadow: dual-tone grass diffuse + gentle relief.
+    // Fewer repeats + low bump so no visible tiling grid across the ground.
+    top.material = grassMat(this.scene, "#4f8a38", 3, 0.28);
     top.receiveShadows = true;
     top.isPickable = false;
+    top.freezeWorldMatrix();
 
     const rim = MeshBuilder.CreateBox("rim", { width: w + 1.4, height: 0.5, depth: d + 1.4 }, this.scene);
     rim.position.set(cx, -0.95, cz);
-    rim.material = flatMat(this.scene, "#5e9440", 0.14);
+    rim.material = flatMat(this.scene, "#3f6f2c", 0.12); // darker earthy edge
     rim.isPickable = false;
+    rim.freezeWorldMatrix();
 
-    // water moat ring (translucent, glowing edge)
+    // animated water moat: scrolling ripple normals + bright fresnel rim
     const moat = MeshBuilder.CreateDisc("moat", { radius: Math.max(w, d) * 0.62, tessellation: 48 }, this.scene);
     moat.rotation.x = Math.PI / 2;
     moat.position.set(cx, -1.15, cz);
-    moat.material = translucentMat(this.scene, "#3fb6e8", 0.55, 0.5);
+    const wmat = waterMat(this.scene, "#2e6fa8", 0.82);
+    moat.material = wmat;
     moat.isPickable = false;
+    moat.freezeWorldMatrix();
+    const bump = wmat.bumpTexture as unknown as { uOffset: number; vOffset: number };
+    this.scene.registerBeforeRender(() => {
+      const dt = this.scene.getEngine().getDeltaTime() * 0.001;
+      bump.uOffset += dt * 0.04;
+      bump.vOffset += dt * 0.025;
+    });
 
     // floating rock underside
     const under = MeshBuilder.CreateCylinder("under", { diameterTop: Math.max(w, d), diameterBottom: 3, height: 9, tessellation: 7 }, this.scene);
     under.position.set(cx, -5.5, cz);
-    under.material = toonMat(this.scene, "#6a5236");
+    // rock underside: flat (not toon) so its big facets don't pick up the toon
+    // fresnel rim (which read as orange/pink slabs behind the island). Muted
+    // earth-grey so the background recedes behind the meadow.
+    under.material = flatMat(this.scene, "#6b5a48", 0.09);
     under.convertToFlatShadedMesh();
     under.isPickable = false;
+    under.freezeWorldMatrix();
   }
 
   private buildPathTiles(): void {
     const total = this.path.totalLength;
     const step = 1.1;
     const out = new Vector3();
+    const even: Mesh[] = [];
+    const odd: Mesh[] = [];
     let i = 0;
     for (let dist = 0; dist <= total; dist += step) {
       const heading = this.path.sample(dist, out, 0.07);
       const tile = MeshBuilder.CreateBox("path", { width: this.map.pathWidth, height: 0.16, depth: step + 0.12 }, this.scene);
       tile.position.copyFrom(out);
       tile.rotation.y = heading;
-      tile.material = bumpyMat(this.scene, i % 2 === 0 ? "#9b7b4e" : "#8a6c42", 1, 0.55);
-      tile.receiveShadows = true;
-      tile.isPickable = false;
+      (i % 2 === 0 ? even : odd).push(tile);
       i++;
     }
+    // warm stone slabs in two *nearly identical* tones — only a whisper of
+    // brick↔brick variation (lightness gap halved again). Overhead it reads as
+    // one uniform sand-stone band, not a diagonal light/dark checker.
+    this.mergeTiles(even, "#7a5f40");
+    this.mergeTiles(odd, "#73593b");
+  }
+
+  private mergeTiles(tiles: Mesh[], hex: string): void {
+    if (tiles.length === 0) return;
+    const merged = Mesh.MergeMeshes(tiles, true, true);
+    if (!merged) return;
+    merged.name = `path_${hex}`;
+    merged.material = bumpyMat(this.scene, hex, 1, 0.55);
+    merged.receiveShadows = true;
+    merged.isPickable = false;
+    merged.freezeWorldMatrix();
   }
 
   private buildPads(): void {
+    // shared, breathing rune material for all rune rings (one draw state, one
+    // pulse loop); base stone must be fresnel-free — toonMat's rim tint reads
+    // as a cyan "filled" plate at grazing view angles.
+    const runeMat = emissivePulseMat(this.scene, "#5fe6d6", 0.7);
+    const stoneMat = flatMat(this.scene, "#2f3a3d", 0.06);
+    const runes: Mesh[] = [];
+
     this.map.buildPoints.forEach((p, index) => {
-      const pad = MeshBuilder.CreateCylinder(`pad_${index}`, { diameterTop: 1.9, diameterBottom: 2.05, height: 0.3, tessellation: 16 }, this.scene);
+      // stone pedestal — this is the pickable build point; top face at y=0.3 so
+      // a placed tower (built at y=0.3) stands flush on it. Metadata must stay.
+      const pad = MeshBuilder.CreateCylinder(`pad_${index}`, { diameterTop: 2.0, diameterBottom: 2.2, height: 0.3, tessellation: 16 }, this.scene);
       pad.position.set(p.x, 0.15, p.z);
-      pad.material = toonMat(this.scene, "#3f7fa0");
+      pad.material = stoneMat;
       pad.receiveShadows = true;
       pad.metadata = { kind: "pad", index };
-      const glow = MeshBuilder.CreateCylinder(`padGlow_${index}`, { diameterTop: 1.45, diameterBottom: 1.45, height: 0.06, tessellation: 16 }, this.scene);
-      glow.position.set(p.x, 0.32, p.z);
-      glow.material = glowMat(this.scene, "#7fe8ff", 0.9);
-      glow.isPickable = false;
-      glow.parent = pad;
+      pad.freezeWorldMatrix();
+      addShadowCaster(pad);
+
+      // inset glowing rune ring near the rim, so the centre stays clear for a tower
+      const rune = MeshBuilder.CreateTorus(`padRune_${index}`, { diameter: 1.55, thickness: 0.13, tessellation: 20 }, this.scene);
+      rune.position.set(p.x, 0.31, p.z);
+      runes.push(rune);
+
       this.pads.push({ index, mesh: pad, position: new Vector3(p.x, 0.45, p.z), occupied: false });
     });
+
+    // merge all rune rings into a single static mesh; pulse its emissive only
+    const merged = Mesh.MergeMeshes(runes, true, true);
+    if (merged) {
+      merged.name = "padRunes";
+      merged.material = runeMat;
+      merged.isPickable = false;
+      merged.receiveShadows = false;
+      merged.freezeWorldMatrix();
+      const baseC = new Color3(0.42, 0.92, 0.85);
+      this.scene.registerBeforeRender(() => {
+        const t = performance.now() * 0.001;
+        const k = 0.55 + Math.sin(t * 1.6) * 0.10; // gentle breathing 0.45..0.65 (ring glows, inner plate never washes bright)
+        runeMat.emissiveColor.copyFromFloats(baseC.r * k, baseC.g * k, baseC.b * k);
+      });
+    }
   }
 
   private buildSpawnPortal(): void {
     const sp = this.map.spawn;
     const root = new TransformNode("spawnPortal", this.scene);
     root.position.set(sp.x, 0, sp.z);
-    instantiate("prop_portal", 3.2, root);
-    applyToonStyle(root, 0.04);
-    // glowing magical swirl in the gateway
-    const swirl = MeshBuilder.CreateDisc("portalInner", { radius: 1.1, tessellation: 24 }, this.scene);
-    swirl.parent = root; swirl.position.set(0, 1.6, 0); swirl.rotation.x = Math.PI / 2.1;
-    swirl.material = glowMat(this.scene, "#b06cff", 1.4);
-    swirl.isPickable = false;
-    this.scene.registerBeforeRender(() => (swirl.rotation.y += 0.03));
+    const frame = instantiate("prop_portal", 3.2, root);
+    this.styleLandmark(frame.modelRoot);
+    // twin counter-rotating soft-glow swirl discs: soft radial alpha keeps them
+    // reading as energy (not a flat plate) and stops bloom washing them white;
+    // slight ellipse makes the counter-rotation visibly shimmer.
+    const outer = MeshBuilder.CreateDisc("portalOuter", { radius: 1.25, tessellation: 28 }, this.scene);
+    outer.parent = root; outer.position.set(0, 1.6, 0); outer.rotation.x = Math.PI / 2.1;
+    outer.scaling.x = 1.25;
+    const om = emissivePulseMat(this.scene, "#8a4fd6", 0.9);
+    om.opacityTexture = softCircleTexture(this.scene);
+    outer.material = om;
+    outer.isPickable = false;
+    const inner = MeshBuilder.CreateDisc("portalInner", { radius: 0.8, tessellation: 24 }, this.scene);
+    inner.parent = root; inner.position.set(0, 1.63, 0); inner.rotation.x = Math.PI / 2.1;
+    inner.scaling.z = 1.3;
+    const im = emissivePulseMat(this.scene, "#c9a0ff", 1.05);
+    im.opacityTexture = softCircleTexture(this.scene);
+    inner.material = im;
+    inner.isPickable = false;
+    this.scene.registerBeforeRender(() => {
+      outer.rotation.y += 0.02;
+      inner.rotation.y -= 0.035;
+    });
   }
 
   private buildGoalCrystal(): void {
@@ -122,17 +199,57 @@ export class SceneBuilder {
     // stone platform base + glowing crystal core
     const base = new TransformNode("goalBase", this.scene);
     base.parent = root;
-    instantiate("prop_platform", 0.8, base);
-    applyToonStyle(base, 0.04);
+    const binst = instantiate("prop_platform", 0.8, base);
+    this.styleLandmark(binst.modelRoot);
+    // soft halo ring around the base for extra presence (soft-edged, not a plate)
+    const halo = MeshBuilder.CreateDisc("goalHalo", { radius: 1.7, tessellation: 32 }, this.scene);
+    halo.parent = root; halo.rotation.x = Math.PI / 2; halo.position.y = 0.08;
+    const haloMat = emissivePulseMat(this.scene, "#46e8d6", 0.6);
+    haloMat.opacityTexture = softCircleTexture(this.scene);
+    halo.material = haloMat;
+    halo.isPickable = false;
+    // Procedural low-poly crystal cluster (owned material with real emissive
+    // glow + facet lighting). The GLB prop_crystal is an instanced, non-
+    // recolourable asset, so we build our own gem for the landmark instead.
     const core = new TransformNode("goalCore", this.scene);
-    core.parent = root; core.position.y = 0.6;
-    const inst = instantiate("prop_crystal", 2.6, core);
-    for (const m of inst.modelRoot.getChildMeshes(false)) m.material = glowMat(this.scene, "#46e8d6", 1.3);
+    core.parent = root; core.position.y = 0.85; // platform top
+    const coreMat = emissivePulseMat(this.scene, "#3fd8c6", 0.55);
+    coreMat.diffuseColor = new Color3(0.14, 0.55, 0.5);
+    coreMat.specularColor = new Color3(0.7, 0.9, 0.85);
+    coreMat.specularPower = 48;
+    coreMat.disableLighting = false; // let facets catch light for a gem read
+    const shard = (h: number, w: number, x: number, z: number, ry: number): void => {
+      const s = MeshBuilder.CreatePolyhedron("crystalShard", { type: 1, size: w }, this.scene);
+      s.scaling.y = h / w;
+      s.position.set(x, h, z); // base sits at core origin
+      s.rotation.y = ry;
+      s.material = coreMat;
+      s.isPickable = false;
+      s.receiveShadows = true;
+      s.parent = core;
+      addShadowCaster(s);
+    };
+    shard(1.5, 0.55, 0, 0, 0);
+    shard(0.95, 0.38, 0.5, 0.12, 0.7);
+    shard(0.75, 0.3, -0.42, -0.22, 1.2);
+    const baseC = new Color3(0.25, 0.85, 0.78);
     this.scene.registerBeforeRender(() => {
       const t = performance.now() * 0.001;
-      core.rotation.y = t * 0.6;
-      core.position.y = 0.6 + Math.sin(t * 2) * 0.12;
+      core.rotation.y = t * 0.5;
+      core.position.y = 0.85 + Math.sin(t * 2) * 0.1;
+      const k = 0.55 + Math.sin(t * 1.8) * 0.22; // colour breathing (stays saturated)
+      coreMat.emissiveColor.copyFromFloats(baseC.r * k, baseC.g * k, baseC.b * k);
     });
+  }
+
+  // Landmark props (portal frame, goal base): receive + cast shadows, no
+  // cartoon outline (keeps a unified no-outline low-poly look with characters).
+  private styleLandmark(root: TransformNode): void {
+    for (const m of root.getChildMeshes(false) as Mesh[]) {
+      if (!m.material) continue;
+      m.receiveShadows = true;
+      addShadowCaster(m);
+    }
   }
 
   private scatterDecorations(): void {
@@ -161,33 +278,44 @@ export class SceneBuilder {
 
   private placeDecoration(x: number, z: number): void {
     const r = rand();
-    if (r < 0.22) this.prop("prop_tree", x, z, randRange(2.8, 4.2));
-    else if (r < 0.34) this.prop("prop_pine", x, z, randRange(2.4, 3.4));
-    else if (r < 0.46) this.prop("prop_rock", x, z, randRange(0.5, 1.2));
-    else if (r < 0.58) this.prop("prop_grass", x, z, randRange(0.4, 0.9));
-    else if (r < 0.66) this.prop("prop_mushroom", x, z, randRange(0.4, 0.8));
-    else if (r < 0.74) this.prop("prop_crystal", x, z, randRange(0.9, 1.6));
-    else if (r < 0.80) this.prop("prop_fence", x, z, 1.0);
-    else if (r < 0.86) this.prop("prop_well", x, z, 1.6);
-    else if (r < 0.92) this.prop("prop_lantern", x, z, 1.7);
-    else if (r < 0.96) this.prop("prop_banner", x, z, 1.8);
+    // small ground clutter (grass/mushroom) skips shadow casting to save fill
+    if (r < 0.22) this.prop("prop_tree", x, z, randRange(2.8, 4.2), true);
+    else if (r < 0.34) this.prop("prop_pine", x, z, randRange(2.4, 3.4), true);
+    else if (r < 0.46) this.prop("prop_rock", x, z, randRange(0.5, 1.2), true);
+    else if (r < 0.58) this.prop("prop_grass", x, z, randRange(0.4, 0.9), false);
+    else if (r < 0.66) this.prop("prop_mushroom", x, z, randRange(0.4, 0.8), false);
+    else if (r < 0.74) this.prop("prop_crystal", x, z, randRange(0.9, 1.6), true);
+    else if (r < 0.80) this.prop("prop_fence", x, z, 1.0, true);
+    else if (r < 0.86) this.prop("prop_well", x, z, 1.6, true);
+    else if (r < 0.92) this.prop("prop_lantern", x, z, 1.7, true);
+    else if (r < 0.96) this.prop("prop_banner", x, z, 1.8, true);
     else this.torch(x, z);
   }
 
-  // place a CC0 glb prop, scaled + randomly rotated
-  private prop(slot: Slot, x: number, z: number, height: number): void {
+  // place a CC0 glb prop, scaled + randomly rotated. No outline (unified
+  // no-outline low-poly look); static, so world matrices are frozen.
+  private prop(slot: Slot, x: number, z: number, height: number, castShadow: boolean): void {
     const t = new TransformNode(slot, this.scene);
     t.position.set(x, 0, z);
-    instantiate(slot, height, t);
+    const inst = instantiate(slot, height, t);
     t.rotation.y = randRange(0, 6.28);
-    applyToonStyle(t, 0.02);
+    this.styleProp(inst.modelRoot, castShadow);
+  }
+
+  private styleProp(root: TransformNode, castShadow: boolean): void {
+    for (const m of root.getChildMeshes(false) as Mesh[]) {
+      if (!m.material) continue;
+      m.receiveShadows = true;
+      if (castShadow) addShadowCaster(m);
+      m.freezeWorldMatrix();
+    }
   }
 
   private torch(x: number, z: number): void {
     const t = new TransformNode("torch", this.scene);
     t.position.set(x, 0, z);
-    instantiate("prop_torch", 1.8, t);
-    applyToonStyle(t, 0.03);
+    const inst = instantiate("prop_torch", 1.8, t);
+    this.styleProp(inst.modelRoot, true);
     this.fireParticles(new Vector3(x, 1.7, z));
   }
 

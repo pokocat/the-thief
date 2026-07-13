@@ -1,7 +1,9 @@
-import { MeshBuilder, TransformNode, Scene, Mesh } from "../bjs";
+import { MeshBuilder, TransformNode, Scene, Mesh, VertexBuffer } from "../bjs";
 import { instantiate, AnimController, Slot, hasModel } from "./Assets";
 import { addShadowCaster } from "./shadows";
-import { toonMat, glowMat, translucentMat, applyToonStyle } from "../entities/models/materials";
+import { translucentMat } from "../entities/models/materials";
+import { tintModel } from "./Tint";
+import type { ProceduralAnim } from "./ProceduralAnim";
 
 // characters: cast + receive shadows, but no heavy outline (looks bad on detailed skinned meshes)
 function shadowsOnly(root: TransformNode): void {
@@ -29,7 +31,7 @@ const ENEMY: Record<string, EnemyReg> = {
   enemy_flying_01: { slot: "enemy_bat", height: 1.7, move: ["Flying", "Fast_Flying"], death: DEATH, yaw: 0 },
   enemy_magic_01: { slot: "enemy_necromancer", height: 2.0, move: ["Walk"], death: DEATH, yaw: 0 },
   enemy_lowvalue_01: { slot: "enemy_spider", height: 1.1, move: ["Spider_Walk", "Walk"], death: ["Spider_Death", "Death"], yaw: 0 },
-  enemy_thief_01: { slot: "enemy_skeleton", height: 1.8, move: ["Run", "Walk"], death: DEATH, yaw: 0 },
+  enemy_thief_01: { slot: "enemy_skeleton", height: 1.8, move: ["Run", "Walk"], death: ["Death", "Dea"], yaw: 0 },
   enemy_boss_01: { slot: "enemy_demon", height: 3.4, move: ["Walk"], death: DEATH, yaw: 0 },
   enemy_boss_02: { slot: "enemy_dragon", height: 4.4, move: ["Dragon_Flying", "Flying"], death: ["Dragon_Death", "Death"], yaw: 0 },
 };
@@ -44,6 +46,42 @@ const TOWER: Record<string, TowerReg> = {
   frost: { slot: "tower_wizard", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
   archer: { slot: "tower_archer", height: 1.9, idle: ["Idle"], attack: [], death: DEATH, yaw: 0 },
 };
+
+// Remove the flat, near-horizontal base-plate faces baked into the bottom of a
+// mesh (the wizard robe ships with a ground quad). Operates on a unique copy of
+// the geometry so the shared asset container is never mutated.
+function stripFlatBase(mesh: Mesh): void {
+  const pos = mesh.getVerticesData(VertexBuffer.PositionKind);
+  const idx = mesh.getIndices();
+  if (!pos || !idx) return;
+  let minY = Infinity, maxY = -Infinity;
+  for (let i = 1; i < pos.length; i += 3) {
+    if (pos[i] < minY) minY = pos[i];
+    if (pos[i] > maxY) maxY = pos[i];
+  }
+  const span = maxY - minY;
+  if (span <= 0) return;
+  const slab = minY + span * 0.06; // only consider the bottom 6%
+  const kept: number[] = [];
+  let removed = 0;
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = idx[t], b = idx[t + 1], c = idx[t + 2];
+    const ay = pos[a * 3 + 1], by = pos[b * 3 + 1], cy = pos[c * 3 + 1];
+    if (ay <= slab && by <= slab && cy <= slab) {
+      const ax = pos[a * 3], az = pos[a * 3 + 2];
+      const e1x = pos[b * 3] - ax, e1y = by - ay, e1z = pos[b * 3 + 2] - az;
+      const e2x = pos[c * 3] - ax, e2y = cy - ay, e2z = pos[c * 3 + 2] - az;
+      const nx = e1y * e2z - e1z * e2y, ny = e1z * e2x - e1x * e2z, nz = e1x * e2y - e1y * e2x;
+      const nlen = Math.hypot(nx, ny, nz) || 1;
+      if (Math.abs(ny) / nlen > 0.7) { removed++; continue; } // near-horizontal base face
+    }
+    kept.push(a, b, c);
+  }
+  if (removed > 0 && kept.length > 0) {
+    mesh.makeGeometryUnique();
+    mesh.setIndices(kept);
+  }
+}
 
 function statusMeshes(scene: Scene, root: TransformNode, height: number): { slowRing: Mesh; freezeBox: Mesh } {
   const slowRing = MeshBuilder.CreateTorus("slowRing", { diameter: height * 0.85, thickness: 0.16, tessellation: 16 }, scene);
@@ -72,31 +110,45 @@ export function buildEnemyGlb(scene: Scene, cfg: EnemyConfig): EnemyVisual {
   return { root, body, topY: height + 0.3, slowRing, freezeBox, limbs: [], anim, moveClips: reg.move, deathClips: reg.death };
 }
 
-export function buildTowerGlb(scene: Scene, cfg: TowerConfig): TowerVisual {
+// Tower visual with an optional procedural animator (for towers whose GLB has
+// no skeletal animation — wizard/archer — and every primitive fallback tower).
+// The Tower attaches `proc` itself once it knows its uid.
+export interface TowerVisualExt extends TowerVisual {
+  proc?: ProceduralAnim;
+}
+
+export function buildTowerGlb(scene: Scene, cfg: TowerConfig): TowerVisualExt {
   const reg = TOWER[cfg.model] ?? TOWER.thief;
   if (!hasModel(reg.slot)) return buildTowerModel(scene, cfg); // procedural fallback
   const root = new TransformNode(`tower_${cfg.id}`, scene);
-  // glb stone platform base (fallback to a simple disc) + colored glow ring
-  let baseTop = 0.5;
-  if (hasModel("prop_platform")) {
-    const pinst = instantiate("prop_platform", 0.5, root);
-    applyToonStyle(root, 0.03);
-    baseTop = pinst.height;
-  } else {
-    cyl(scene, root, toonMat(scene, "#544a63"), 1.5, 1.95, 0.45, 0.22);
-    applyToonStyle(root, 0.05);
-  }
-  const ring = cyl(scene, root, glowMat(scene, cfg.color, 0.9), 1.3, 1.3, 0.06, baseTop + 0.02);
-  ring.renderOutline = false;
+  // The scene build-pad (stone ring + rune disc) is the tower's base now, so no
+  // per-tower platform mesh and no extra glow ring (it z-fought the pad disc).
+  // Feet sit at the root origin; element identity comes from the robe tint.
+  const baseTop = 0;
 
   const head = new TransformNode(`towerHead_${cfg.id}`, scene);
   head.parent = root; head.position.y = baseTop;
   const height = reg.height + (cfg.tier - 1) * 0.12;
-  const inst = instantiate(reg.slot, height, head);
+  // the 4 wizard variants share tower_wizard.glb and must be recolored per
+  // instance, so clone meshes (real Mesh) rather than share via InstancedMesh
+  const needsTint = reg.slot === "tower_wizard";
+  const inst = instantiate(reg.slot, height, head, needsTint);
   inst.modelRoot.rotation.y = reg.yaw;
   shadowsOnly(inst.modelRoot);
-  const anim = new AnimController(inst.anims);
-  anim.play(reg.idle, true);
+  if (needsTint) {
+    // recolor the robe (Atlas_Diffuse) by element color
+    tintModel(inst.modelRoot, ["Atlas_Diffuse"], cfg.color, 0.85);
+    // the wizard GLB bakes a flat base-plate quad into the robe mesh; it reads
+    // as an ugly floating board now that the tower sits at y=0. Strip those
+    // horizontal bottom faces (on a unique geometry copy, so the shared
+    // container geometry is untouched and other instances keep their base).
+    for (const m of inst.modelRoot.getChildMeshes(false) as Mesh[]) {
+      if (m.material && m.material.name.startsWith("Atlas_Diffuse")) stripFlatBase(m);
+    }
+  }
+  const skinned = inst.anims.length > 0;
+  const anim = skinned ? new AnimController(inst.anims) : undefined;
+  anim?.play(reg.idle, true);
   return { root, head, muzzleHeight: height * 0.7 + baseTop, anim };
 }
 
@@ -105,10 +157,4 @@ export function towerAttackClips(model: string): string[] {
 }
 export function towerIdleClips(model: string): string[] {
   return (TOWER[model] ?? TOWER.thief).idle;
-}
-
-function cyl(s: Scene, p: TransformNode, m: import("../bjs").Material, dTop: number, dBot: number, h: number, y: number): Mesh {
-  const x = MeshBuilder.CreateCylinder("c", { diameterTop: dTop, diameterBottom: dBot, height: h, tessellation: 16 }, s);
-  x.material = m; x.parent = p; x.position.y = y;
-  return x;
 }

@@ -29,6 +29,11 @@ export class Enemy {
   // steal bookkeeping: how many times each tower stole from this enemy
   stolenBy = new Map<number, number>();
 
+  // smoothed facing (heading is eased toward, not snapped) + hit-feedback timers
+  yaw = 0;
+  hitFlash = 0; // seconds of white overlay remaining
+  squashT = 0; // seconds of squash-recover remaining
+
   readonly pos = new Vector3();
 
   reset(cfg: EnemyConfig, hpMul: number, speedMul: number, rewardMul: number, visual: EnemyVisual): void {
@@ -47,6 +52,8 @@ export class Enemy {
     this.frozenUntil = 0;
     this.armorShred = 0;
     this.armorShredUntil = 0;
+    this.hitFlash = 0;
+    this.squashT = 0;
     this.stolenBy.clear();
     visual.root.setEnabled(true);
   }
