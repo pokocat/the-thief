@@ -99,8 +99,16 @@ export function buildTowerGlb(scene: Scene, cfg: TowerConfig): TowerVisualExt {
   const inst = instantiate(reg.slot, height, head, needsTint);
   inst.modelRoot.rotation.y = reg.yaw;
   shadowsOnly(inst.modelRoot);
-  // recolor the robe (Atlas_Diffuse) by element color
-  if (needsTint) tintModel(inst.modelRoot, ["Atlas_Diffuse"], cfg.color, 0.85);
+  if (needsTint) {
+    // recolor the robe (Atlas_Diffuse) by element color
+    tintModel(inst.modelRoot, ["Atlas_Diffuse"], cfg.color, 0.85);
+    // the wizard GLB bakes in a flat "Atlas_Unlit" decal plane that renders as
+    // an ugly light rectangle on the ground now that the tower sits at y=0 —
+    // hide it (real shadows already ground the tower).
+    for (const m of inst.modelRoot.getChildMeshes(false)) {
+      if (m.material && m.material.name.startsWith("Atlas_Unlit")) m.setEnabled(false);
+    }
+  }
   const skinned = inst.anims.length > 0;
   const anim = skinned ? new AnimController(inst.anims) : undefined;
   anim?.play(reg.idle, true);
